@@ -1,0 +1,11 @@
+[tool.ruff]
+# Set the maximum line length, 88 is the standard for the Black code formatter.
+line-length = 88
+
+# Enable the default set of rules (E, F, W) plus common extras:
+# B: flake8-bugbear (finds likely bugs)
+# I: isort (ensures imports are sorted)
+select = ["E", "F", "W", "B", "I"]
+
+[tool.ruff.format]
+quote-style = "double"

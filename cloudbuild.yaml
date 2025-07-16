@@ -1,0 +1,33 @@
+# This file defines the CI/CD pipeline for the Python backend on Google Cloud.
+# This build expects substitution variables from the Cloud Build Trigger:
+# - _SERVICE_NAME: The name of the Cloud Run service (e.g., 'regional-aibot-api')
+# - _REGION: The Google Cloud region for deployment (e.g., 'us-central1')
+
+steps:
+  # Step 1: Build the container image using the Dockerfile in the api directory
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_SERVICE_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '.'
+      - '-f=pre project/api/Dockerfile' # Explicitly point to the Dockerfile
+    id: 'Build'
+
+  # Step 2: Push the container image to Google Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_SERVICE_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}']
+    id: 'Push'
+
+  # Step 3: Deploy the new container image to Cloud Run
+  - name: 'gcr.io/google-cloud-sdk/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_SERVICE_NAME}/${_SERVICE_NAME}:${COMMIT_SHA}'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+    id: 'Deploy'
+

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tutor & Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h3>AI Tutor & Assistant</h3>
+            <div>
+                <div class="header-controls">
+                    <select id="language-selector" title="Select Language">
+                        <option value="en-US" selected>English</option>
+                        <option value="ur-PK">Urdu</option>
+                        <option value="pa-PK">Punjabi (Shahmukhi)</option>
+                        <option value="ps-PK">Pashto</option>
+                        <option value="sd-PK">Sindhi</option>
+                    </select>
+                    <button id="history-toggle-btn" class="btn icon-btn" title="Toggle History">
+                        <span class="button-text">👁️</span>
+                    </button>
+                    <button id="theme-toggle-btn" class="btn icon-btn" title="Toggle Theme">
+                        <span class="button-text">🌙</span>
+                    </button>
+                    <button id="clear-history-btn" class="btn icon-btn" title="Clear Chat History">
+                        <span class="button-text">🗑️</span><div class="spinner"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="chat-box" class="chat-box">
+            <div class="message ai-message">
+                <p>Hello! How can I help you today? Ask me a question about Math, Physics, Chemistry, or anything else!</p>
+            </div>
+        </div>
+        <form id="chat-form" class="chat-input-form">
+            <input type="file" id="image-input" accept="image/*" hidden>
+            <label for="image-input" class="btn icon-btn" title="Upload Image">
+                <span class="button-text">📷</span>
+            </label>
+            <input type="file" id="voice-input" accept="audio/*" hidden>
+            <label for="voice-input" class="btn icon-btn" title="Upload Voice Note">
+                <span class="button-text">🎤</span>
+            </label>
+            <input type="text" id="user-input" placeholder="Type your question here...">
+            <button type="submit" id="send-btn" class="btn btn-primary" title="Send Text">
+                <span class="button-text">Send</span>
+                <div class="spinner"></div>
+            </button>
+            <button type="button" id="stop-generating-btn" class="btn btn-secondary" title="Stop Generating" style="display: none;">
+                <span class="button-text">⏹️ Stop</span>
+            </button>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+    <script type="module" src="js/main.js" defer></script>
+</body>
+</html>

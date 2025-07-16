@@ -1,0 +1,56 @@
+diff --git a/backend/main.py b/backend/main.py
+index 1234567..abcdef0 100644
+--- a/backend/main.py
++++ b/backend/main.py
+@@ -10,4 +10,5 @@ app = FastAPI(title="Regional AI")
+ app.include_router(chat.router)
+ 
+-uvicorn.run(app, host="0.0.0.0", port=8000)
++if __name__ == "__main__":
++    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+diff --git a/backend/routers/chat.py b/backend/routers/chat.py
+index 1111111..2222222 100644
+--- a/backend/routers/chat.py
++++ b/backend/routers/chat.py
+@@ -1,5 +1,5 @@
+ from fastapi import APIRouter, Request
+-import json
++from models.chat import QueryRequest
+ 
+ router = APIRouter(prefix="/chat", tags=["chat"])
+ 
+@@ -44,8 +44,7 @@ async def regenerate(chat_id: str):
+     return {"status": "ok"}
+ 
+-@router.post("/query")
+-async def query(request: Request):
+-    body = await request.body()
+-    data = json.loads(body)
+-    ...
++@router.post("/query", response_model=ChatResponse)
++async def query(payload: QueryRequest):
++    ...
+
+diff --git a/backend/Dockerfile b/backend/Dockerfile
+index 7777777..8888888 100644
+--- a/backend/Dockerfile
++++ b/backend/Dockerfile
+@@ -3,10 +3,15 @@ WORKDIR /app
+ 
+ COPY requirements.txt .
+ RUN pip install --no-cache-dir -r requirements.txt
++
++RUN addgroup -S app && adduser -S app -G app
++
+ COPY . .
+ 
++USER app
++
+ EXPOSE 8000
+ 
+-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
++CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+ 
+ HEALTHCHECK --interval=30s --timeout=3s \
+   CMD curl -f http://localhost:8000/health || exit 1

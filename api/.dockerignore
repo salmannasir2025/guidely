@@ -1,0 +1,25 @@
+# This single file tells Docker and gcloud which files to ignore for the build.
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile*
+.dockerignore
+
+# Python virtual environment
+.venv/
+venv/
+ENV/
+
+# Python cache and artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Secrets and local config
+.env*
+
+# Exclude test files from the production image
+tests/
