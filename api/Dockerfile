@@ -2,6 +2,8 @@
 # This stage installs all dependencies, including development ones,
 # creating a complete environment for testing or building.
 FROM python:3.11-slim as builder
+RUN groupadd -r app && useradd -r -g app app
+USER app
 
 # Set environment variables to prevent Python from writing .pyc files
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -20,6 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # --- Final Stage ---
 # This stage creates the lean production image.
 FROM python:3.11-slim as final
+RUN groupadd -r app && useradd -r -g app app
+USER app
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
