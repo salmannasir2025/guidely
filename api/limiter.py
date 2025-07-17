@@ -17,9 +17,14 @@ def initialize_limiter():
             logging.info("Rate limiter configured with Redis storage.")
             return Limiter(key_func=get_remote_address, storage_uri=settings.redis_url)
         except redis.exceptions.ConnectionError as e:
-            logging.warning(f"Could not connect to Redis for rate limiting ({e}). Falling back to in-memory storage.")
-    logging.warning("No REDIS_URL configured. Falling back to in-memory storage for rate limiting. Limits will NOT be shared across instances.")
+            logging.warning(
+                f"Could not connect to Redis for rate limiting ({e}). Falling back to in-memory storage."
+            )
+    logging.warning(
+        "No REDIS_URL configured. Falling back to in-memory storage for rate limiting. Limits will NOT be shared across instances."
+    )
     return Limiter(key_func=get_remote_address)
+
 
 limiter = initialize_limiter()
 default_rate_limit = "20/minute"

@@ -11,18 +11,26 @@ db = None
 interaction_collection = None
 feedback_collection = None
 
+
 def initialize_database():
     """Initializes the database connection and collections."""
     global client, db, interaction_collection, feedback_collection
     try:
         logging.info("Initializing database connection...")
-        client = motor.motor_asyncio.AsyncIOMotorClient(settings.mongo_connection_string)
+        client = motor.motor_asyncio.AsyncIOMotorClient(
+            settings.mongo_connection_string
+        )
         db = client[settings.mongo_db_name]
-        interaction_collection = db.get_collection(settings.mongo_interactions_collection)
+        interaction_collection = db.get_collection(
+            settings.mongo_interactions_collection
+        )
         feedback_collection = db.get_collection(settings.mongo_feedback_collection)
         logging.info("Database connection initialized successfully.")
     except Exception as e:
-        logging.error("Failed to initialize database connection.", extra={"error": str(e)})
+        logging.error(
+            "Failed to initialize database connection.", extra={"error": str(e)}
+        )
+
 
 async def log_interaction(request: AskRequest, response: AskResponse):
     """Logs a user query and the system's response to the database."""
@@ -37,15 +45,16 @@ async def log_interaction(request: AskRequest, response: AskResponse):
         "language_code": request.language_code,
         "answer": response.answer,
         "source": response.source,
-        "timestamp": datetime.now(timezone.utc)
+        "timestamp": datetime.now(timezone.utc),
     }
     try:
         await interaction_collection.insert_one(log_document)
     except Exception as e:
         logging.error(
             "Failed to log interaction.",
-            extra={"user_id": request.user_id, "query": request.query, "error": str(e)}
+            extra={"user_id": request.user_id, "query": request.query, "error": str(e)},
         )
+
 
 async def get_user_history(user_id: str) -> List[HistoryItem]:
     """Retrieves the last 10 interactions for a given user."""
@@ -55,18 +64,21 @@ async def get_user_history(user_id: str) -> List[HistoryItem]:
 
     try:
         # Find documents for the user, sort by most recent, and limit to 10
-        cursor = interaction_collection.find(
-            {"user_id": user_id}
-        ).sort("timestamp", -1).limit(10)
-        
+        cursor = (
+            interaction_collection.find({"user_id": user_id})
+            .sort("timestamp", -1)
+            .limit(10)
+        )
+
         history_docs = await cursor.to_list(length=10)
         return [HistoryItem(**doc) for doc in history_docs]
     except Exception as e:
         logging.error(
             "Failed to retrieve user history.",
-            extra={"user_id": user_id, "error": str(e)}
+            extra={"user_id": user_id, "error": str(e)},
         )
         return []
+
 
 async def delete_user_history(user_id: str) -> int:
     """Deletes all interactions for a given user and returns the count of deleted documents."""
@@ -79,15 +91,16 @@ async def delete_user_history(user_id: str) -> int:
         deleted_count = result.deleted_count
         logging.info(
             "User history deleted successfully.",
-            extra={"user_id": user_id, "deleted_count": deleted_count}
+            extra={"user_id": user_id, "deleted_count": deleted_count},
         )
         return deleted_count
     except Exception as e:
         logging.error(
             "Failed to delete user history.",
-            extra={"user_id": user_id, "error": str(e)}
+            extra={"user_id": user_id, "error": str(e)},
         )
         return 0
+
 
 async def check_db_connection() -> bool:
     """Checks if the database client can connect to the server."""
@@ -95,10 +108,11 @@ async def check_db_connection() -> bool:
         return False
     try:
         # The 'hello' command is the modern, lightweight way to check connection status.
-        await client.admin.command('hello')
+        await client.admin.command("hello")
         return True
     except Exception:
         return False
+
 
 async def log_feedback(request: FeedbackRequest) -> None:
     """Logs user feedback to the database."""
@@ -111,13 +125,16 @@ async def log_feedback(request: FeedbackRequest) -> None:
         "query": request.query,
         "answer": request.answer,
         "feedback_type": request.feedback_type,
-        "timestamp": datetime.now(timezone.utc)
+        "timestamp": datetime.now(timezone.utc),
     }
     try:
         await feedback_collection.insert_one(log_document)
-        logging.info("Feedback logged successfully.", extra={"user_id": request.user_id, "feedback": request.feedback_type})
+        logging.info(
+            "Feedback logged successfully.",
+            extra={"user_id": request.user_id, "feedback": request.feedback_type},
+        )
     except Exception as e:
         logging.error(
             "Failed to log feedback.",
-            extra={"user_id": request.user_id, "error": str(e)}
+            extra={"user_id": request.user_id, "error": str(e)},
         )

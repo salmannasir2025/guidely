@@ -41,7 +41,7 @@ def test_health_check_one_unhealthy(mock_health_dependencies):
     # --- Arrange ---
     for mock in mock_health_dependencies.values():
         mock.return_value = True
-    mock_health_dependencies["db"].return_value = False # Simulate DB failure
+    mock_health_dependencies["db"].return_value = False  # Simulate DB failure
 
     # --- Act ---
     response = client.get("/health")

@@ -4,6 +4,7 @@ from .cache import redis_cache
 from fastapi.concurrency import run_in_threadpool
 import logging
 
+
 @redis_cache(ttl=3600)  # Cache web search results for 1 hour
 async def perform_web_search(query: str) -> str:
     """
@@ -39,8 +40,5 @@ async def perform_web_search(query: str) -> str:
 
         return "\n\n".join(context_parts)
     except Exception as e:
-        logging.error(
-            "SerpAPI search failed.",
-            extra={"query": query, "error": str(e)}
-        )
+        logging.error("SerpAPI search failed.", extra={"query": query, "error": str(e)})
         return ""

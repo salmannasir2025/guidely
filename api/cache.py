@@ -18,6 +18,7 @@ except redis.exceptions.ConnectionError as e:
     logging.error(f"Failed to connect to Redis: {e}. Caching will be disabled.")
     redis_client = None
 
+
 def check_redis_connection() -> bool:
     """Checks if the redis client is connected."""
     if not redis_client:
@@ -35,6 +36,7 @@ def redis_cache(ttl: int = 3600):
     It assumes it is decorating an async function and uses a threadpool
     for non-blocking I/O with the synchronous redis-py client.
     """
+
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         async def wrapper(*args, **kwargs) -> Any:
@@ -42,7 +44,9 @@ def redis_cache(ttl: int = 3600):
                 return await func(*args, **kwargs)
 
             # Create a stable cache key from the function's name and arguments
-            arg_representation = json.dumps((args, sorted(kwargs.items())), sort_keys=True)
+            arg_representation = json.dumps(
+                (args, sorted(kwargs.items())), sort_keys=True
+            )
             key_hash = hashlib.md5(arg_representation.encode()).hexdigest()
             cache_key = f"cache:{func.__name__}:{key_hash}"
 
@@ -54,10 +58,16 @@ def redis_cache(ttl: int = 3600):
 
                 logging.info(f"Cache MISS for {func.__name__}")
                 result = await func(*args, **kwargs)
-                await run_in_threadpool(redis_client.setex, cache_key, ttl, json.dumps(result))
+                await run_in_threadpool(
+                    redis_client.setex, cache_key, ttl, json.dumps(result)
+                )
                 return result
             except (redis.exceptions.RedisError, TypeError) as e:
-                logging.error(f"Redis cache error for {func.__name__}: {e}. Calling function directly.")
+                logging.error(
+                    f"Redis cache error for {func.__name__}: {e}. Calling function directly."
+                )
                 return await func(*args, **kwargs)
+
         return wrapper
+
     return decorator

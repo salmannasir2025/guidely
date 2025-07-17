@@ -9,7 +9,14 @@ from ..schemas import AskRequest, AskResponse
 router = APIRouter(prefix="/ask", tags=["Core"])
 
 # A set of categories that should trigger a web search for context.
-SEARCHABLE_CATEGORIES = {"physics", "chemistry", "programming", "ai_concepts", "digital_marketing", "general_knowledge"}
+SEARCHABLE_CATEGORIES = {
+    "physics",
+    "chemistry",
+    "programming",
+    "ai_concepts",
+    "digital_marketing",
+    "general_knowledge",
+}
 
 
 async def stream_and_log(request_body: AskRequest, stream_generator):
@@ -47,7 +54,11 @@ async def get_response_generator(body: AskRequest):
         math_result = await math_solver.solve_math_problem(body.query)
         if math_result:
             # The solver gave a definitive answer. We yield it directly and finish.
-            yield {"type": "result", "source": "math_solver", "chunk": f"The answer is {math_result}."}
+            yield {
+                "type": "result",
+                "source": "math_solver",
+                "chunk": f"The answer is {math_result}.",
+            }
             return
 
     # 3. For other categories or if the math solver fails, gather context using web search.
@@ -59,7 +70,9 @@ async def get_response_generator(body: AskRequest):
             source = "web_search"
 
     # 4. Generate the final prompt for the LLM using the gathered context
-    prompt = prompts.get_rag_prompt(category, search_context, body.query, body.language_code)
+    prompt = prompts.get_rag_prompt(
+        category, search_context, body.query, body.language_code
+    )
 
     # 5. Yield the source metadata, then stream the LLM's explanation as content chunks
     yield {"type": "metadata", "source": source}
@@ -85,7 +98,12 @@ async def handle_ask(request: Request, body: AskRequest):
         logging.error(f"LLMError in /ask endpoint: {e}", extra={"query": body.query})
         raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
-        logging.error(f"Unexpected error in /ask endpoint: {e}", extra={"query": body.query}, exc_info=True)
+        logging.error(
+            f"Unexpected error in /ask endpoint: {e}",
+            extra={"query": body.query},
+            exc_info=True,
+        )
         raise HTTPException(
             status_code=500, detail="An unexpected internal error occurred."
         )
+ api/cache.py api/config.py api/data.py api/database.py api/index.py api/limiter.py api/llm.py api/logging_config.py api/math_solver.py api/ocr.py api/prompts.py api/schemas.py api/search.py api/speech.py api/utils.py

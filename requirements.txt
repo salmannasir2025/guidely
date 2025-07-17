@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+python-dotenv
+requests
+sympy
+google-cloud-vision
+google-cloud-texttospeech
+google-generativeai
+google-search-results
+google-cloud-speech
+motor
+redis
+slowapi
+python-json-logger

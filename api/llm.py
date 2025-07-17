@@ -6,7 +6,8 @@ from fastapi.concurrency import run_in_threadpool
 from .prompts import PROMPT_TEMPLATES
 
 # Define the model at the module level, but it will be configured on app startup.
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel("gemini-pro")
+
 
 def initialize_llm():
     """Configures the Gemini API client with the API key from settings."""
@@ -14,8 +15,10 @@ def initialize_llm():
     genai.configure(api_key=settings.gemini_api_key)
     logging.info("Gemini API client initialized successfully.")
 
+
 class LLMError(Exception):
     """Custom exception for errors related to the Language Model API."""
+
     pass
 
 
@@ -29,9 +32,10 @@ def get_llm_explanation(prompt: str) -> str:
     except Exception as e:
         logging.error(
             "Error calling Gemini API for explanation.",
-            extra={"prompt_start": prompt[:100], "error": str(e)}
+            extra={"prompt_start": prompt[:100], "error": str(e)},
         )
         raise LLMError("Error generating response from the language model.") from e
+
 
 async def get_llm_explanation_stream(prompt: str):
     """
@@ -46,9 +50,10 @@ async def get_llm_explanation_stream(prompt: str):
     except Exception as e:
         logging.error(
             "Error calling Gemini API stream.",
-            extra={"prompt_start": prompt[:100], "error": str(e)}
+            extra={"prompt_start": prompt[:100], "error": str(e)},
         )
         raise LLMError("Error generating response from the language model.") from e
+
 
 @redis_cache(ttl=86400)  # Cache classifications for 24 hours
 async def classify_query(query: str) -> str:
@@ -69,6 +74,7 @@ Respond with a single word from the list of categories. Do not add any explanati
 
 User Query: "{query}"
 Classification:"""
+
     def _classify():
         try:
             response = model.generate_content(prompt)
@@ -76,18 +82,21 @@ Classification:"""
             valid_categories = list(PROMPT_TEMPLATES.keys())
             if category in valid_categories:
                 return category
-            logging.warning(f"LLM classification returned an unexpected value: '{category}'. Defaulting to 'general_knowledge'.")
+            logging.warning(
+                f"LLM classification returned an unexpected value: '{category}'. Defaulting to 'general_knowledge'."
+            )
             return "general_knowledge"
         except Exception as e:
             logging.error(
                 "Error during LLM classification.",
-                extra={"query": query, "error": str(e)}
+                extra={"query": query, "error": str(e)},
             )
             return "general_knowledge"
 
     return await run_in_threadpool(_classify)
 
-@redis_cache(ttl=86400) # Cache translations for 24 hours
+
+@redis_cache(ttl=86400)  # Cache translations for 24 hours
 async def translate_text(text: str, target_language: str, source_language: str) -> str:
     """
     Uses the LLM to translate text from a source language to a target language.
@@ -101,11 +110,12 @@ async def translate_text(text: str, target_language: str, source_language: str) 
         except Exception as e:
             logging.error(
                 "Error during LLM translation.",
-                extra={"target_language": target_language, "error": str(e)}
+                extra={"target_language": target_language, "error": str(e)},
             )
             raise LLMError("Error translating text.") from e
 
     return await run_in_threadpool(_translate)
+
 
 def check_llm_client() -> bool:
     """Checks if the LLM model client is initialized."""
