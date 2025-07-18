@@ -4,18 +4,17 @@ on:
   push:
     branches:
       - "main"
-    # Only run this workflow if files in the backend or the workflow itself change.
     paths:
       - "backend/**"
       - ".github/workflows/deploy.yml"
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
 
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GCP_REGION: asia-south1         # Must match Artifact Registry location
+  GCP_REGION: us-central1                 # <<< changed
   SERVICE_NAME: regional-ai-backend
   ARTIFACT_REGISTRY: regional-ai-repo
-  VPC_CONNECTOR_NAME: cloud-run-connector-south1
+  VPC_CONNECTOR_NAME: cloud-run-connector-central1   # <<< changed (name must exist)
 
 jobs:
   test:
@@ -61,27 +60,27 @@ jobs:
 
       - name: Authenticate to Google Cloud
         id: auth
-        uses: "google-github-actions/auth@v2"
+        uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
 
       - name: Set up Cloud SDK
-        uses: "google-github-actions/setup-gcloud@v2"
+        uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker
-        run: gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev   # <<< changed
 
       - name: Build and Push Docker Image
         run: |
-          IMAGE="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          IMAGE="us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
           docker build -f Dockerfile -t "$IMAGE" .
           docker push "$IMAGE"
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image "${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}" \
+            --image "us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}" \
             --region ${{ env.GCP_REGION }} \
             --platform managed \
             --allow-unauthenticated \
