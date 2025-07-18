@@ -12,10 +12,10 @@ on:
 
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GCP_REGION: asia-south1 # Correct region for your Redis instance
+  GCP_REGION: asia-south1         # Must match Artifact Registry location
   SERVICE_NAME: regional-ai-backend
   ARTIFACT_REGISTRY: regional-ai-repo
-  VPC_CONNECTOR_NAME: cloud-run-connector-south1 # The name of your new connector
+  VPC_CONNECTOR_NAME: cloud-run-connector-south1
 
 jobs:
   test:
@@ -49,7 +49,7 @@ jobs:
 
   deploy:
     name: Build and Deploy to Cloud Run
-    needs: test # This job will only run if the 'test' job succeeds
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: "read"
@@ -74,13 +74,14 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -f Dockerfile -t ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
-          docker push ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+          IMAGE="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          docker build -f Dockerfile -t "$IMAGE" .
+          docker push "$IMAGE"
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image ${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+            --image "${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}" \
             --region ${{ env.GCP_REGION }} \
             --platform managed \
             --allow-unauthenticated \
