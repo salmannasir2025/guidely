@@ -106,4 +106,14 @@ async def handle_ask(request: Request, body: AskRequest):
         raise HTTPException(
             status_code=500, detail="An unexpected internal error occurred."
         )
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        logging.error(
+            f"Unexpected error in /ask endpoint: {e}",
+            extra={"query": body.query},
+            exc_info=True,
+        )
+        raise HTTPException(
+            status_code=500, detail="An unexpected internal error occurred."
+        )
  api/cache.py api/config.py api/data.py api/database.py api/index.py api/limiter.py api/llm.py api/logging_config.py api/math_solver.py api/ocr.py api/prompts.py api/schemas.py api/search.py api/speech.py api/utils.py
