@@ -1,0 +1,37 @@
+name: Deploy to Cloud Run (region-ai)
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  PROJECT_ID: region-ai
+  REGION: us-central1
+  IMAGE: gcr.io/region-ai/guidely-backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+      - run: gcloud auth configure-docker --quiet
+
+      - run: docker build -t ${{ env.IMAGE }} .
+      - run: docker push ${{ env.IMAGE }}
+
+      - run: |
+          gcloud run deploy guidely-backend \
+            --image ${{ env.IMAGE }} \
+            --region ${{ env.REGION }} \
+            --allow-unauthenticated \
+            --set-secrets="GEMINI_API_KEY=GEMINI_API_KEY:latest,SERPAPI_API_KEY=SERPAPI_API_KEY:latest,MONGO_CONNECTION_STRING=MONGO_CONNECTION_STRING:latest,REDIS_URL=REDIS_URL:latest,FRONTEND_URL=FRONTEND_URL:latest"
