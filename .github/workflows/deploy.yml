@@ -14,7 +14,6 @@ env:
   GCP_REGION: us-central1
   SERVICE_NAME: regional-ai-backend
   ARTIFACT_REGISTRY: regional-ai-repo
-  # VPC_CONNECTOR_NAME removed — connector skipped for now
 
 jobs:
   test:
@@ -71,6 +70,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
+          cd backend
           IMAGE="us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
           docker build -f Dockerfile -t "$IMAGE" .
           docker push "$IMAGE"
