@@ -123,6 +123,6 @@ POST /feedback: Allows users to submit feedback on the quality of an answer.
 
 ### License and Usage
 Guidely: AI Tutor & Assistant is currently under development and is made publicly available for reference and educational purposes. The project is not open-source under traditional licenses.
-You are allowed to use this project for commercial purposes, but you must obtain written consent from the copyright holder before engaging in any distribution or reproduction of the project's code or any of its parts. Unauthorized commercial use, distribution, and reproduction are strictly prohibited.
+you must obtain written consent from the copyright holder before engaging in any distribution or reproduction of the project's code or any of its parts. Unauthorized commercial use, distribution, and reproduction are strictly prohibited.
 For inquiries regarding the use of this project, please contact the project maintainer directly.
-Disclaimer: This notice does not replace a formal license. A proper license will be provided at a later date. Until then, please respect the terms mentioned above.
+Disclaimer: A proper license will be provided at a later date. Until then, please respect the terms mentioned above.
