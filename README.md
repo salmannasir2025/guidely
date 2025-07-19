@@ -50,34 +50,34 @@ Follow these instructions to set up and run the project on your local machine fo
 git clone https://github.com/salmannasir2025/guidely.git
 cd guidely
 
-## 2. Backend Setup
+### 2. Backend Setup
 The backend is a FastAPI application located in the api/ directory.
 Step A: Create and Activate Virtual Environment
 
-# Navigate into the API directory
+### Navigate into the API directory
 cd api
 
-## Create a virtual environment
+### Create a virtual environment
 python -m venv .venv
 
-## Activate the environment
-## On Windows (PowerShell):
+### Activate the environment
+### On Windows (PowerShell):
 .\\.venv\\Scripts\\Activate.ps1
 
-## On macOS/Linux:
+### On macOS/Linux:
 source .venv/bin/activate
 Step B: Install Dependencies
 
-## Ensure your virtual environment is active
+### Ensure your virtual environment is active
 pip install -r requirements.txt
 
-## Step C: Configure Environment Variables
+### Step C: Configure Environment Variables
 The application requires API keys and connection strings to run. These are managed via a .env file for local development.
 Create a file named .env inside the api/ directory.
 Copy the contents of api/.env.example into your new api/.env file.
 Fill in the actual values for each variable.
 
-## Required Variables:
+### Required Variables:
 
 Variable	Description
 GEMINI_API_KEY	Your API key for the Google Gemini LLM.
@@ -87,18 +87,18 @@ REDIS_URL	The connection URL for your Redis instance.
 FRONTEND_URL	The local URL of the frontend (e.g., http://127.0.0.1:5500) for CORS.
 Note: The .env file is listed in .gitignore and will never be committed to the repository.
 
-##Step D: Run the Backend Server
-# From the 'api/' directory with the virtual environment active:
+### Step D: Run the Backend Server
+### From the 'api/' directory with the virtual environment active:
 uvicorn index:app --reload
 The API will be available at http://127.0.0.1:8000. You can view the interactive documentation at http://127.0.0.1:8000/docs.
 
-## 3. Frontend Setup
+### 3. Frontend Setup
 With the backend running, you can now launch the vanilla JS frontend.
 Open with a Live Server:
 The easiest way to run the frontend is with a live server extension (like "Live Server" in VS Code).
 Right-click the frontend/index.html file and choose "Open with Live Server". This handles CORS issues automatically.
 
-## Open Directly:
+### Open Directly:
 Alternatively, navigate to the frontend directory in your file explorer.
 Open the index.html file directly in a modern web browser.
 The application should now be fully functional on your local machine.
@@ -111,7 +111,8 @@ Authenticates securely with Google Cloud using Workload Identity Federation.
 Builds a production-ready Docker image using the multi-stage Dockerfile.
 Pushes the image to Google Artifact Registry.
 Deploys the new image to Google Cloud Run.
-## Secret Management: All production API keys are stored securely in Google Secret Manager and are injected into the Cloud Run service at runtime. They are never stored in the source code or the container image.
+
+### Secret Management: All production API keys are stored securely in Google Secret Manager and are injected into the Cloud Run service at runtime. They are never stored in the source code or the container image.
 API Endpoints
 A few key endpoints provided by the API:
 GET /health: Performs a health check on all critical dependencies (Database, Cache, LLM, etc.) and returns a status report.
