@@ -125,4 +125,4 @@ POST /feedback: Allows users to submit feedback on the quality of an answer.
 Guidely: AI Tutor & Assistant is currently under development and is made publicly available for reference and educational purposes. The project is not open-source under traditional licenses.
 you must obtain written consent from the copyright holder before engaging in any distribution or reproduction of the project's code or any of its parts. Unauthorized commercial use, distribution, and reproduction are strictly prohibited.
 For inquiries regarding the use of this project, please contact the project maintainer directly.
-Disclaimer: A proper license will be provided at a later date. Until then, please respect the terms mentioned above.
+Disclaimer: A proper license will be provided at a later date. Until then, please respect the terms mentioned.
