@@ -1,0 +1,62 @@
+Project Overview
+Guidely is a multimodal AI assistant and subject tutor designed to provide comprehensive help for students and general users. It leverages modern AI services and a robust backend architecture to deliver accurate, real-time answers across a variety of subjects. The project is well-structured and includes a comprehensive README that outlines the key features, tech stack, local development setup, and deployment process.
+Key Features
+Dual Modes: Functions as both a general-purpose "AI Assistant" and a specialized "AI Tutor".
+Multimodal Input: Accepts queries via text, voice (Speech-to-Text), and images (OCR).
+Intelligent Subject Routing: Automatically classifies user queries to use the best tool for the job.
+Real-time Streaming: LLM responses are streamed to the frontend for a responsive, real-time chat experience.
+Accurate Math Solver: Integrates sympy for precise mathematical calculations.
+Live Web Search (RAG): Uses Retrieval-Augmented Generation with live web search results.
+Full-Featured Frontend: Clean, modern UI with features like dark mode, chat history, audio playback, file uploads, and response regeneration.
+Production-Ready Backend: Built with FastAPI and includes structured logging, rate limiting, health checks, and a distributed Redis cache.
+CI/CD Automation: GitHub Actions workflows for automated build, test, and deployment to Google Cloud Run.
+Tech Stack
+Backend: FastAPI, Uvicorn
+Database: MongoDB Atlas
+Cache: Redis
+Core AI Services:
+LLM: Google Gemini
+Speech-to-Text: Google Cloud Speech-to-Text
+Text-to-Speech: Google Cloud Text-to-Speech
+OCR: Google Cloud Vision
+Web Search: SerpAPI
+Frontend: Vanilla HTML, CSS, and JavaScript (ESM)
+Deployment: Docker, Google Cloud Run, GitHub Actions
+Local Development Setup
+The README provides detailed instructions for setting up and running the project locally. This includes:
+Prerequisites: Git, Python 3.11+, Docker Desktop, Google Cloud SDK, GitHub CLI, and access to various cloud services.
+Backend Setup: Creating and activating a virtual environment, installing dependencies, configuring environment variables, and running the backend server.
+Frontend Setup: Running the frontend using a live server or opening the index.html file directly in a browser.
+Deployment
+The project is configured for automated CI/CD using GitHub Actions and Google Cloud. The deployment process includes:
+Trigger: Automatically triggered on every git push to the main branch.
+Process: Authenticates with Google Cloud, builds a Docker image, pushes it to Google Artifact Registry, and deploys it to Google Cloud Run.
+Secret Management: Production API keys are stored securely in Google Secret Manager and injected at runtime.
+API Endpoints
+Key endpoints provided by the API include:
+GET /health: Health check on all critical dependencies.
+POST /ask: Main endpoint for submitting user queries.
+GET /history/{user_id}: Retrieves the last 10 interactions for a specific user.
+DELETE /history/{user_id}: Deletes all chat history for a specific user.
+POST /feedback: Allows users to submit feedback on the quality of an answer.
+Suggestions for Improvement
+Documentation:
+API Documentation: Consider using a tool like Swagger or Redoc to generate interactive API documentation.
+Code Comments: Add more inline comments to explain complex logic and decisions.
+Testing:
+Unit Tests: Ensure comprehensive unit tests are in place for both backend and frontend code.
+Integration Tests: Implement integration tests to verify the interaction between different components.
+Security:
+Environment Variables: Ensure that sensitive information is never hard-coded and always managed through environment variables or secret management services.
+Dependency Management: Regularly update dependencies to patch known vulnerabilities.
+Performance:
+Caching Strategy: Optimize caching strategies to reduce latency and improve response times.
+Load Testing: Perform load testing to ensure the application can handle high traffic.
+User Experience:
+Error Handling: Improve error handling and provide user-friendly error messages.
+Accessibility: Ensure the frontend is accessible to users with disabilities by following WCAG guidelines.
+Scalability:
+Horizontal Scaling: Ensure the backend can scale horizontally to handle increased load.
+Database Optimization: Optimize database queries and indexes to improve performance.
+Conclusion
+The Guidely project is well-structured and includes a comprehensive set of features and modern technologies. By following the provided instructions, developers can easily set up and run the project locally. The CI/CD pipeline ensures smooth deployment to production. With a few improvements in documentation, testing, security, performance, user experience, and scalability, the project can be further enhanced to meet the needs of a larger user base.
