@@ -12,8 +12,8 @@ on:
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GCP_REGION: us-central1
-  SERVICE_NAME: regional-ai-backend
-  ARTIFACT_REGISTRY: regional-ai-repo
+  SERVICE_NAME: guidely-backend            # << updated to the new service/repo name
+  ARTIFACT_REGISTRY: guidely-backend       # << repository name in Artifact Registry
 
 jobs:
   test:
@@ -70,14 +70,14 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          IMAGE="us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          IMAGE="us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}:${{ github.sha }}"
           docker build -f Dockerfile -t "$IMAGE" .
           docker push "$IMAGE"
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image "us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}" \
+            --image "us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REGISTRY }}:${{ github.sha }}" \
             --region ${{ env.GCP_REGION }} \
             --platform managed \
             --allow-unauthenticated \
