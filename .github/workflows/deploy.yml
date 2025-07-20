@@ -12,8 +12,8 @@ on:
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GCP_REGION: us-central1
-  SERVICE_NAME: guidely-backend            # << updated to the new service/repo name
-  ARTIFACT_REGISTRY: guidely-backend       # << repository name in Artifact Registry
+  SERVICE_NAME: guidely-backend
+  ARTIFACT_REGISTRY: guidely-backend
 
 jobs:
   test:
