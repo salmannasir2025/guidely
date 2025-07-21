@@ -5,8 +5,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from motor.motor_asyncio import AsyncIOMotorCollection
-from .database import db, get_user_collection
+from .database import user_collection
 from .config import settings
 from .schemas.auth import User, UserCreate, TokenData
 
@@ -37,9 +36,9 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 async def get_user(email: str) -> Optional[dict]:
     """Get user from database."""
-    user_collection = await get_user_collection()
-    if user_dict := await user_collection.find_one({"email": email}):
-        return user_dict
+    if user_collection:
+        if user_dict := await user_collection.find_one({"email": email}):
+            return user_dict
     return None
 
 async def authenticate_user(email: str, password: str) -> Optional[User]:
@@ -100,7 +99,6 @@ async def create_user(user: UserCreate) -> User:
         )
     
     # Create user document
-    user_collection = await get_user_collection()
     user_doc = {
         "email": user.email,
         "full_name": user.full_name,
@@ -109,6 +107,9 @@ async def create_user(user: UserCreate) -> User:
     }
     
     # Insert into database
-    await user_collection.insert_one(user_doc)
+    if user_collection:
+        await user_collection.insert_one(user_doc)
+    else:
+        raise HTTPException(status_code=500, detail="Database not initialized")
     
     return User(**user_doc)

@@ -14,3 +14,7 @@ motor
 redis
 slowapi
 python-json-logger
+python-jose[cryptography]
+passlib[argon2]
+email-validator
+python-multipart
