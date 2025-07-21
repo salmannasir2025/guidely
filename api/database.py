@@ -10,11 +10,12 @@ client: motor.motor_asyncio.AsyncIOMotorClient = None
 db = None
 interaction_collection = None
 feedback_collection = None
+user_collection = None
 
 
-def initialize_database():
+async def initialize_database():
     """Initializes the database connection and collections."""
-    global client, db, interaction_collection, feedback_collection
+    global client, db, interaction_collection, feedback_collection, user_collection
     try:
         logging.info("Initializing database connection...")
         client = motor.motor_asyncio.AsyncIOMotorClient(
@@ -25,6 +26,16 @@ def initialize_database():
             settings.mongo_interactions_collection
         )
         feedback_collection = db.get_collection(settings.mongo_feedback_collection)
+        user_collection = db.get_collection(settings.mongo_users_collection)
+        
+        # Create unique index on email field for users collection
+        if user_collection:
+            await user_collection.create_index("email", unique=True)
+        
+        # Create unique index on email field for users collection
+        if user_collection:
+            await user_collection.create_index("email", unique=True)
+            
         logging.info("Database connection initialized successfully.")
     except Exception as e:
         logging.error(

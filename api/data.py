@@ -1,28 +1,34 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Depends
 
 from .. import database
 from ..limiter import default_rate_limit, limiter
-from ..schemas import FeedbackRequest, HistoryResponse
+from ..schemas.core import FeedbackRequest, HistoryResponse
+from ..auth import get_current_active_user, User
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/data",
+    tags=["User Data"],
+    dependencies=[Depends(get_current_active_user)]
+)
 
 
-@router.get("/history/{user_id}", response_model=HistoryResponse, tags=["User Data"])
+@router.get("/history", response_model=HistoryResponse)
 @limiter.limit(default_rate_limit)
-async def get_history(request: Request, user_id: str):
-    history_data = await database.get_user_history(user_id)
+async def get_history(request: Request, current_user: User = Depends(get_current_active_user)):
+    history_data = await database.get_user_history(current_user.email)
     return HistoryResponse(history=history_data)
 
 
-@router.delete("/history/{user_id}", status_code=204, tags=["User Data"])
+@router.delete("/history", status_code=204)
 @limiter.limit("5/minute")
-async def clear_history(request: Request, user_id: str):
-    await database.delete_user_history(user_id)
+async def clear_history(request: Request, current_user: User = Depends(get_current_active_user)):
+    await database.delete_user_history(current_user.email)
     return
 
 
-@router.post("/feedback", status_code=201, tags=["User Data"])
+@router.post("/feedback", status_code=201)
 @limiter.limit(default_rate_limit)
-async def submit_feedback(request: Request, body: FeedbackRequest):
+async def submit_feedback(request: Request, body: FeedbackRequest, current_user: User = Depends(get_current_active_user)):
+    body.user_id = current_user.email  # Override user_id with authenticated user's email
     await database.log_feedback(body)
     return {"message": "Feedback received"}

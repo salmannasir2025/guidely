@@ -1,12 +1,17 @@
 import logging
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 import json
 from fastapi.responses import StreamingResponse
 from .. import llm, search, math_solver, prompts, database
 from ..limiter import expensive_api_rate_limit, limiter
-from ..schemas import AskRequest, AskResponse
+from ..schemas.core import AskRequest, AskResponse
+from ..auth import get_current_active_user, User
 
-router = APIRouter(prefix="/ask", tags=["Core"])
+router = APIRouter(
+    prefix="/ask",
+    tags=["Core"],
+    dependencies=[Depends(get_current_active_user)]
+)
 
 # A set of categories that should trigger a web search for context.
 SEARCHABLE_CATEGORIES = {
@@ -37,7 +42,7 @@ async def stream_and_log(request_body: AskRequest, stream_generator):
         final_answer = "".join(full_response_text)
         if final_answer:  # Only log if there was an answer
             response_body = AskResponse(answer=final_answer, source=source)
-            await database.log_interaction(request_body, response_body)
+            await database.log_interaction(current_user.email, request_body.query, final_answer, source)
 
 
 async def get_response_generator(body: AskRequest):
@@ -82,7 +87,7 @@ async def get_response_generator(body: AskRequest):
 
 @router.post("/", response_class=StreamingResponse)
 @limiter.limit(expensive_api_rate_limit)
-async def handle_ask(request: Request, body: AskRequest):
+async def handle_ask(request: Request, body: AskRequest, current_user: User = Depends(get_current_active_user)):
     """
     Main endpoint for handling user queries.
     It classifies the query, gathers context from various tools (like a

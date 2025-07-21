@@ -7,7 +7,6 @@ class AskRequest(BaseModel):
     """Defines the structure for a request to the /ask endpoint."""
 
     query: str
-    user_id: str
     mode: str  # "tutor" or "assistant"
     language_code: Optional[str] = "en-US"
 

@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     mongo_db_name: str = "ai_tutor_db"
     mongo_interactions_collection: str = "interactions"
     mongo_feedback_collection: str = "feedback"
+    mongo_users_collection: str = "users"
+    
+    # JWT Settings
+    jwt_secret_key: str
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 30
 
     # This makes .env loading robust by specifying the path relative to this file.
     model_config = SettingsConfigDict(
