@@ -9,6 +9,7 @@ from ..auth import (
     get_current_active_user
 )
 from ..config import settings
+from ..schemas import AskRequest, AskResponse
 from ..schemas.auth import Token, UserCreate, User
 
 router = APIRouter(

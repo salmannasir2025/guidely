@@ -1,4 +1,4 @@
-from .auth import UserCreate, UserLogin, Token, TokenData, User
+from .auth import UserCreate, Token, TokenData, User
 from .core import (
     AskRequest, AskResponse,
     SynthesizeRequest,
@@ -11,7 +11,6 @@ from .core import (
 __all__ = [
     # Auth schemas
     "UserCreate",
-    "UserLogin",
     "Token",
     "TokenData",
     "User",

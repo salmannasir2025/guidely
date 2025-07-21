@@ -32,10 +32,11 @@ async def initialize_database():
         if user_collection:
             await user_collection.create_index("email", unique=True)
         
-        # Create unique index on email field for users collection
-        if user_collection:
-            await user_collection.create_index("email", unique=True)
-            
+        # Create compound index for user history queries for performance
+        if interaction_collection:
+            await interaction_collection.create_index(
+                [("user_id", 1), ("timestamp", -1)]
+            )
         logging.info("Database connection initialized successfully.")
     except Exception as e:
         logging.error(
@@ -43,14 +44,16 @@ async def initialize_database():
         )
 
 
-async def log_interaction(request: AskRequest, response: AskResponse):
+async def log_interaction(
+    user_id: str, request: AskRequest, response: AskResponse
+):
     """Logs a user query and the system's response to the database."""
     if not interaction_collection:
         logging.warning("Database not available. Skipping interaction log.")
         return
 
     log_document = {
-        "user_id": request.user_id,
+        "user_id": user_id,
         "mode": request.mode,
         "query": request.query,
         "language_code": request.language_code,
@@ -63,7 +66,7 @@ async def log_interaction(request: AskRequest, response: AskResponse):
     except Exception as e:
         logging.error(
             "Failed to log interaction.",
-            extra={"user_id": request.user_id, "query": request.query, "error": str(e)},
+            extra={"user_id": user_id, "query": request.query, "error": str(e)},
         )
 
 

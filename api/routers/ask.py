@@ -24,7 +24,9 @@ SEARCHABLE_CATEGORIES = {
 }
 
 
-async def stream_and_log(request_body: AskRequest, stream_generator, current_user: User):
+async def stream_and_log(
+    request_body: AskRequest, stream_generator, current_user: User
+):
     """
     A wrapper generator that streams responses while also capturing the full
     text to log it in the database after the stream is complete.
@@ -97,7 +99,8 @@ async def handle_ask(request: Request, body: AskRequest, current_user: User = De
     try:
         response_generator = get_response_generator(body)
         return StreamingResponse(
-            stream_and_log(body, response_generator, current_user), media_type="application/x-ndjson"
+            stream_and_log(body, response_generator, current_user),
+            media_type="application/x-ndjson",
         )
     except llm.LLMError as e:
         logging.error(f"LLMError in /ask endpoint: {e}", extra={"query": body.query})
