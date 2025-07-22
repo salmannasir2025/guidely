@@ -18,3 +18,4 @@ python-jose[cryptography]
 passlib[argon2]
 email-validator
 python-multipart
+fastapi-mail

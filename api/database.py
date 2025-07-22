@@ -11,11 +11,12 @@ db = None
 interaction_collection = None
 feedback_collection = None
 user_collection = None
+file_collection = None
 
 
 async def initialize_database():
     """Initializes the database connection and collections."""
-    global client, db, interaction_collection, feedback_collection, user_collection
+    global client, db, interaction_collection, feedback_collection, user_collection, file_collection
     try:
         logging.info("Initializing database connection...")
         client = motor.motor_asyncio.AsyncIOMotorClient(
@@ -27,6 +28,7 @@ async def initialize_database():
         )
         feedback_collection = db.get_collection(settings.mongo_feedback_collection)
         user_collection = db.get_collection(settings.mongo_users_collection)
+        file_collection = db.get_collection("files")
         
         # Create unique index on email field for users collection
         if user_collection:
@@ -37,6 +39,11 @@ async def initialize_database():
             await interaction_collection.create_index(
                 [("user_id", 1), ("timestamp", -1)]
             )
+            
+        # Create index for file uploads
+        if file_collection:
+            await file_collection.create_index("user_id")
+            
         logging.info("Database connection initialized successfully.")
     except Exception as e:
         logging.error(
@@ -152,3 +159,75 @@ async def log_feedback(request: FeedbackRequest) -> None:
             "Failed to log feedback.",
             extra={"user_id": request.user_id, "error": str(e)},
         )
+
+
+# Add these functions for file management
+async def save_file_metadata(file_data: dict) -> str:
+    """Saves file metadata to the database and returns the file ID."""
+    if not file_collection:
+        logging.warning("Database not available. Cannot save file metadata.")
+        return None
+        
+    try:
+        result = await file_collection.insert_one(file_data)
+        return str(result.inserted_id)
+    except Exception as e:
+        logging.error(
+            "Failed to save file metadata.",
+            extra={"user_id": file_data["user_id"], "error": str(e)}
+        )
+        return None
+
+async def get_user_files(user_id: str):
+    """Retrieves all files uploaded by a user."""
+    if not file_collection:
+        logging.warning("Database not available. Cannot retrieve files.")
+        return []
+        
+    try:
+        cursor = file_collection.find({"user_id": user_id})
+        files = await cursor.to_list(length=100)
+        return files
+    except Exception as e:
+        logging.error(
+            "Failed to retrieve user files.",
+            extra={"user_id": user_id, "error": str(e)}
+        )
+        return []
+
+async def get_file_by_id(file_id: str):
+    """Retrieves a file by its ID."""
+    if not file_collection:
+        logging.warning("Database not available. Cannot retrieve file.")
+        return None
+        
+    try:
+        from bson import ObjectId
+        file = await file_collection.find_one({"_id": ObjectId(file_id)})
+        return file
+    except Exception as e:
+        logging.error(
+            "Failed to retrieve file.",
+            extra={"file_id": file_id, "error": str(e)}
+        )
+        return None
+
+async def update_file_ocr_text(file_id: str, ocr_text: str):
+    """Updates the OCR text for a file."""
+    if not file_collection:
+        logging.warning("Database not available. Cannot update file.")
+        return False
+        
+    try:
+        from bson import ObjectId
+        result = await file_collection.update_one(
+            {"_id": ObjectId(file_id)},
+            {"$set": {"ocr_text": ocr_text, "is_processed": True}}
+        )
+        return result.modified_count > 0
+    except Exception as e:
+        logging.error(
+            "Failed to update file OCR text.",
+            extra={"file_id": file_id, "error": str(e)}
+        )
+        return False

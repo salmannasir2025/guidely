@@ -114,3 +114,71 @@ async def handle_ask(request: Request, body: AskRequest, current_user: User = De
         raise HTTPException(
             status_code=500, detail="An unexpected internal error occurred."
         )
+
+
+# Add this endpoint for guest users
+@router.post("/guest", response_class=StreamingResponse)
+@limiter.limit(expensive_api_rate_limit)
+async def handle_guest_ask(request: Request, body: AskRequest):
+    """Handle simple queries from non-registered users."""
+    try:
+        # Check if the query is complex (requires more resources)
+        is_complex = await _is_complex_query(body.query)
+        
+        if is_complex:
+            # Return a message asking the user to register
+            return StreamingResponse(
+                _generate_registration_prompt(),
+                media_type="application/x-ndjson"
+            )
+        
+        # For simple queries, process normally but with stricter rate limits
+        response_generator = get_response_generator(body)
+        
+        # Create a guest user for logging
+        guest_user = User(email="guest@example.com", role="guest")
+        
+        return StreamingResponse(
+            stream_and_log(body, response_generator, guest_user),
+            media_type="application/x-ndjson"
+        )
+    except Exception as e:
+        logging.error(f"Error in guest ask endpoint: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred")
+
+async def _is_complex_query(query: str) -> bool:
+    """Determine if a query is complex and requires registration."""
+    # This is a simple implementation - in a real system, you might use
+    # more sophisticated methods to determine complexity
+    complex_indicators = [
+        "step by step",
+        "explain in detail",
+        "analyze",
+        "compare and contrast",
+        "write a",
+        "create a",
+        "generate"
+    ]
+    
+    # Check query length
+    if len(query) > 100:
+        return True
+    
+    # Check for complex indicators
+    query_lower = query.lower()
+    for indicator in complex_indicators:
+        if indicator in query_lower:
+            return True
+    
+    return False
+
+async def _generate_registration_prompt():
+    """Generate a message prompting the user to register."""
+    message = (
+        "This query appears to be complex and requires more resources. "
+        "Please register for a free account to access our full capabilities, "
+        "including complex queries, file uploads, and OCR processing."
+    )
+    
+    yield {"type": "metadata", "source": "system"}
+    yield {"type": "content", "chunk": message}

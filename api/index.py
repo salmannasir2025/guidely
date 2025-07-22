@@ -8,7 +8,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
 from . import cache, config, database, llm, logging_config, ocr, speech
-from .routers import ask, data, auth, utils  # Import the router modules
+from .routers import ask, data, auth, utils, files  # Import the router modules
 from .limiter import _rate_limit_exceeded_handler, limiter
 from .schemas import ComponentStatus, HealthCheckResponse
 
@@ -57,10 +57,15 @@ app.add_middleware(
 )
 
 # --- API Routers ---
+# Update the import line
+from .routers import ask, data, auth, utils, files  # Add files to the import
+
+# Update the router registration section
 app.include_router(auth.router)
 app.include_router(ask.router)
 app.include_router(data.router)
 app.include_router(utils.router)
+app.include_router(files.router)  # Add the files router
 
 
 @app.get("/", tags=["Monitoring"])

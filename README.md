@@ -35,7 +35,7 @@ The backend for this application is now deployed on **[Fly.io](https://fly.io/)*
   - **OCR:** Google Cloud Vision
   - **Web Search:** SerpAPI
 - **Frontend:** Vanilla HTML, CSS, and JavaScript (ESM)
-- **Deployment:** Docker, Google Cloud Run, GitHub Actions
+- **Deployment:** Fly.io, Docker, GitHub Actions
 
 
 
@@ -48,8 +48,6 @@ Follow these instructions to set up and run the project on your local machine fo
 - Git
 - Python 3.11+
 - Docker Desktop (recommended)
-- Google Cloud SDK (`gcloud`)
-- GitHub CLI (`gh`)
 - Access to a MongoDB Atlas cluster, Redis instance, and the required Google Cloud APIs.
 
 ### 1. Clone the Repository
@@ -109,24 +107,10 @@ Right-click the frontend/index.html file and choose "Open with Live Server". Thi
 Alternatively, navigate to the frontend directory in your file explorer.
 Open the index.html file directly in a modern web browser.
 The application should now be fully functional on your local machine.
-Deployment
 
-This project is configured for automated CI/CD using GitHub Actions and Google Cloud.
-Trigger: A deployment is automatically triggered on every git push to the main branch.
-Process: The .github/workflows/deploy.yml workflow performs the following steps:
-Authenticates securely with Google Cloud using Workload Identity Federation.
-Builds a production-ready Docker image using the multi-stage Dockerfile.
-Pushes the image to Google Artifact Registry.
-Deploys the new image to Google Cloud Run.
+## ☁️ Deployment
 
-### Secret Management: All production API keys are stored securely in Google Secret Manager and are injected into the Cloud Run service at runtime. They are never stored in the source code or the container image.
-API Endpoints
-A few key endpoints provided by the API:
-GET /health: Performs a health check on all critical dependencies (Database, Cache, LLM, etc.) and returns a status report.
-POST /ask: The main endpoint for submitting user queries. It handles classification, tool routing, and streams the final answer.
-GET /history/{user_id}: Retrieves the last 10 interactions for a specific user.
-DELETE /history/{user_id}: Deletes all chat history for a specific user.
-POST /feedback: Allows users to submit feedback on the quality of an answer.
+This application is configured for continuous deployment to **Fly.io**. Any push to the `main` branch will automatically trigger the deployment workflow defined in `.github/workflows/fly-deploy.yml`.
 
 ### License and Usage
 Guidely: AI Tutor & Assistant is currently under development and is made publicly available for reference and educational purposes. The project is not open-source under traditional licenses.
