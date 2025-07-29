@@ -14,45 +14,43 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        # This checks out your code
-
-      - name: Show repo root contents
+        # Checks out the code
+      
+      - name: Debug: show repo root contents
         run: ls -la ${{ github.workspace }}
-        # Debug: See what’s at repo root
+        # Shows all files/folders at the repo root
 
-      - name: Show backend directory contents
+      - name: Debug: show api folder contents
         run: |
-          if [ -d "${{ github.workspace }}/backend" ]; then
-            echo "Found backend directory:"
-            ls -la "${{ github.workspace }}/backend"
+          if [ -d "${{ github.workspace }}/api" ]; then
+            ls -la "${{ github.workspace }}/api"
           else
-            echo "ERROR: backend directory not found!"
+            echo "ERROR: api directory not found!"
             exit 1
           fi
-        # Debug: Fail early if backend folder is missing
+        # Shows contents of api folder, fails if missing
 
-      - name: Install backend dependencies
-        working-directory: backend
+      - name: Install Python dependencies
+        working-directory: api
         run: |
-          if [ -f package.json ]; then
-            npm ci
-          elif [ -f requirements.txt ]; then
+          if [ -f requirements.txt ]; then
+            python -m pip install --upgrade pip
             pip install -r requirements.txt
           else
-            echo "No recognized dependency file found in backend."
+            echo "ERROR: requirements.txt not found in api/"
+            exit 1
           fi
-        # Installs dependencies for Node or Python backend
+        # Installs Python packages, fails if requirements.txt missing
 
       - name: Run backend tests
-        working-directory: backend
+        working-directory: api
         run: |
-          if [ -f package.json ]; then
-            npm test
-          elif [ -f pytest.ini ] || [ -f requirements.txt ]; then
-            pytest || python -m unittest discover
+          if [ -f pytest.ini ] || [ -f requirements.txt ]; then
+            pytest
           else
-            echo "No test runner configured."
+            echo "No test runner or requirements found in api/"
+            exit 1
           fi
-        # Runs backend tests for Node or Python
+        # Runs tests with pytest. Change to your test runner if needed.
 
-      # Add more steps below as needed (build, deploy, etc.)
+      # Add more steps below as needed, e.g., build, deploy, lint, etc.
