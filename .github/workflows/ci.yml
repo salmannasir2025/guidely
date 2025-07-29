@@ -14,21 +14,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        # Checks out the code
       
       - name: Debug: show repo root contents
-        run: ls -la ${{ github.workspace }}
+        run: ls -la
         # Shows all files/folders at the repo root
 
       - name: Debug: show api folder contents
         run: |
-          if [ -d "${{ github.workspace }}/api" ]; then
-            ls -la "${{ github.workspace }}/api"
+          if [ -d "api" ]; then
+            ls -la "api"
           else
             echo "ERROR: api directory not found!"
             exit 1
           fi
-        # Shows contents of api folder, fails if missing
 
       - name: Install Python dependencies
         working-directory: api
@@ -40,7 +38,6 @@ jobs:
             echo "ERROR: requirements.txt not found in api/"
             exit 1
           fi
-        # Installs Python packages, fails if requirements.txt missing
 
       - name: Run backend tests
         working-directory: api
@@ -51,6 +48,3 @@ jobs:
             echo "No test runner or requirements found in api/"
             exit 1
           fi
-        # Runs tests with pytest. Change to your test runner if needed.
-
-      # Add more steps below as needed, e.g., build, deploy, lint, etc.
