@@ -17,7 +17,6 @@ jobs:
       
       - name: Debug: show repo root contents
         run: ls -la
-        # Shows all files/folders at the repo root
 
       - name: Debug: show api folder contents
         run: |
@@ -42,9 +41,4 @@ jobs:
       - name: Run backend tests
         working-directory: api
         run: |
-          if [ -f pytest.ini ] || [ -f requirements.txt ]; then
-            pytest
-          else
-            echo "No test runner or requirements found in api/"
-            exit 1
-          fi
+          pytest
