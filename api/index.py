@@ -132,4 +132,4 @@ if __name__ == "__main__":
 
     # This block allows running the app directly for local development
     # e.g., `python -m backend.main` from the root directory
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
