@@ -129,8 +129,7 @@ async def health_check(response: Response):
 
 
 if __name__ == "__main__":
+    import os
     import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
 
-    # This block allows running the app directly for local development
-    # e.g., `python -m backend.main` from the root directory
-   uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))

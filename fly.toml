@@ -11,13 +11,13 @@ primary_region = 'sin'
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = 'stop'
+  auto_stop_machines = false        # ⬅️ App will NOT suspend
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1          # ⬅️ Always keep 1 instance running
   processes = ['app']
 
 [processes]
-  app = "python -m api.index"
+  app = "python -m api.index"       # ⬅️ Runs your FastAPI app as a module
 
 [[vm]]
   size = 'shared-cpu-1x'
