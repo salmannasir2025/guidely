@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse, StreamingResponse
 import asyncio
+import os
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
@@ -132,4 +133,4 @@ if __name__ == "__main__":
 
     # This block allows running the app directly for local development
     # e.g., `python -m backend.main` from the root directory
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+   uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
