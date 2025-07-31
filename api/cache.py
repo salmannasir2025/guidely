@@ -11,7 +11,7 @@ from .config import settings
 # --- Redis Client Initialization ---
 try:
     # from_url is convenient as it parses the connection string
-    redis_client = redis.from_url(settings.redis_url, decode_responses=True)
+   # redis_client = redis.from_url(settings.redis_url, decode_responses=True)
     redis_client.ping()  # Check the connection
     logging.info("Successfully connected to Redis.")
 except redis.exceptions.ConnectionError as e:
