@@ -13,11 +13,10 @@ primary_region = 'sin'
   force_https = true
   auto_stop_machines = false        # ⬅️ App will NOT suspend
   auto_start_machines = true
-  min_machines_running = 1          # ⬅️ Always keep 1 instance running
-  processes = ['app']
-
-[processes]
-  app = "python -m api.index"       # ⬅️ Runs your FastAPI app as a module
+  min_machines_running = 1
 
 [[vm]]
   size = 'shared-cpu-1x'
+
+[processes]
+  app = "uvicorn api.main:app --host 0.0.0.0 --port 8080"
