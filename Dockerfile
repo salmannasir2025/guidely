@@ -51,4 +51,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Launch the app
-CMD ["uvicorn", "api.index:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["/home/app/.local/bin/uvicorn", "api.index:app", "--host", "0.0.0.0", "--port", "8080"]
