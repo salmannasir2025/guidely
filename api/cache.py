@@ -11,6 +11,10 @@ def check_cache_connection() -> bool:
     """Checks if the cache is available."""
     return True  # In-memory cache is always available
 
+def check_redis_connection() -> bool:
+    """Checks if Redis cache is available (alias for check_cache_connection)."""
+    return check_cache_connection()
+
 def memory_cache_decorator(ttl: int = 3600):
     """
     A decorator for caching function results in an in-memory dictionary.
@@ -42,3 +46,14 @@ def memory_cache_decorator(ttl: int = 3600):
         return wrapper
 
     return decorator
+
+# Redis cache decorator fallback to memory cache
+def redis_cache(ttl: int = 3600):
+    """
+    A decorator that mimics Redis cache behavior using in-memory cache.
+    This provides compatibility for code expecting redis_cache decorator.
+    """
+    return memory_cache_decorator(ttl=ttl)
+
+# Export redis_cache as a module-level variable for import compatibility
+__all__ = ['redis_cache', 'check_cache_connection', 'check_redis_connection', 'memory_cache_decorator']
