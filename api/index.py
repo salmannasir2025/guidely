@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse, StreamingResponse
 import asyncio
 import os
+import logging
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
@@ -21,7 +22,7 @@ async def lifespan(app: FastAPI):
     llm.initialize_llm()
     database.initialize_database()
     ocr.initialize_ocr_client()
-    speech.initialize_speech_clients()
+    cache.initialize_redis()  # Initialize Redis client
     yield
     # Code to run on application shutdown (e.g., close connections)
     logging.info("Application shutdown.")
@@ -132,4 +133,3 @@ if __name__ == "__main__":
     import os
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
-

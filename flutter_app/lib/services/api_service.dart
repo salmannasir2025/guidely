@@ -5,9 +5,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 class ApiService {
-  // For Android Emulator, use 10.0.2.2 to connect to your local machine's localhost.
-  // For physical devices, use your computer's network IP address.
-  static const String _baseUrl = 'http://10.0.2.2:8000';
+  // Production URL for the deployed backend
+  static const String _prodUrl = 'https://guidely-api.fly.dev';
+  // For local development:
+  // - Android Emulator: use 10.0.2.2 to connect to your local machine's localhost
+  // - iOS Simulator: use localhost
+  // - Physical devices: use your computer's network IP address
+  static const String _devUrl = 'http://10.0.2.2:8000';
+  
+  // Set to true for production, false for development
+  static const bool _isProduction = true;
+  
+  static String get _baseUrl => _isProduction ? _prodUrl : _devUrl;
   static String? _userId;
 
   Future<void> initialize() async {

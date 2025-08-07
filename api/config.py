@@ -35,11 +35,19 @@ class Settings(BaseSettings):
     # File settings
     file_upload_max_size: int = 10 * 1024 * 1024  # 10 MB
     allowed_file_types: List[str] = ["image/jpeg", "image/png", "image/gif"]
+    
+    # Additional settings with defaults
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 30
+    mail_port: int = 587
+    mail_starttls: bool = True
+    mail_ssl_tls: bool = False
 
     # This makes .env loading robust by specifying the path relative to this file.
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(__file__), ".env"),
         env_file_encoding="utf-8",
+        extra="ignore",
     )
 
 

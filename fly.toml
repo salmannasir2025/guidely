@@ -1,5 +1,5 @@
 
-# fly.toml app configuration file generated for guidely-api on 2025-07-21T00:36:36+04:00
+# fly.toml app configuration file for guidely-api
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -12,13 +12,32 @@ primary_region = 'sin'
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = false        # ⬅️ App will NOT suspend
+  auto_stop_machines = false        # App will NOT suspend
   auto_start_machines = true
   min_machines_running = 1
   processes = ["app"]
 
 [[vm]]
   size = 'shared-cpu-1x'
+  memory = '1gb'
 
 [processes]
   app = "uvicorn api.index:app --host 0.0.0.0 --port 8080"
+
+# Environment variables required for the application
+[env]
+  FRONTEND_URL = "https://salmannasir2025.github.io"
+  PORT = "8080"
+
+# Secrets are set using the fly secrets command
+# fly secrets set GEMINI_API_KEY=your_key_here
+# Required secrets:
+# - GEMINI_API_KEY
+# - SERPAPI_API_KEY
+# - MONGO_CONNECTION_STRING
+# - REDIS_URL
+# - JWT_SECRET_KEY
+# - MAIL_USERNAME
+# - MAIL_PASSWORD
+# - MAIL_FROM
+# - MAIL_SERVER

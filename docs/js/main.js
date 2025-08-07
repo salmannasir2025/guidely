@@ -1,4 +1,5 @@
 import { askAI } from './api.js';
+import { BACKEND_URL } from './config.js';
 import {
     appendMessage,
     createStreamedMessage,

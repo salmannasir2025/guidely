@@ -45,11 +45,16 @@ async def authenticate_user(email: str, password: str) -> Optional[User]:
     """Authenticate a user."""
     if user_dict := await get_user(email):
         if verify_password(password, user_dict["hashed_password"]):
-            return User(
-                email=user_dict["email"],
-                full_name=user_dict.get("full_name"),
-                is_active=user_dict.get("is_active", True)
-            )
+            # Convert MongoDB _id to string id for the User model
+            user_data = {
+                "email": user_dict["email"],
+                "full_name": user_dict.get("full_name"),
+                "is_active": user_dict.get("is_active", True),
+                "role": user_dict.get("role", "registered"),
+                "file_uploads": user_dict.get("file_uploads", []),
+                "id": str(user_dict.get("_id"))
+            }
+            return User(**user_data)
     return None
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
@@ -73,11 +78,16 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         raise credentials_exception
     
     if user_dict := await get_user(token_data.email):
-        return User(
-            email=user_dict["email"],
-            full_name=user_dict.get("full_name"),
-            is_active=user_dict.get("is_active", True)
-        )
+        # Convert MongoDB _id to string id for the User model
+        user_data = {
+            "email": user_dict["email"],
+            "full_name": user_dict.get("full_name"),
+            "is_active": user_dict.get("is_active", True),
+            "role": user_dict.get("role", "registered"),
+            "file_uploads": user_dict.get("file_uploads", []),
+            "id": str(user_dict.get("_id"))
+        }
+        return User(**user_data)
     raise credentials_exception
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
@@ -103,12 +113,16 @@ async def create_user(user: UserCreate) -> User:
         "email": user.email,
         "full_name": user.full_name,
         "hashed_password": get_password_hash(user.password),
-        "is_active": True
+        "is_active": True,
+        "role": "registered",
+        "file_uploads": []
     }
     
     # Insert into database
     if user_collection:
-        await user_collection.insert_one(user_doc)
+        result = await user_collection.insert_one(user_doc)
+        # Add the ObjectId as string to the user document
+        user_doc["id"] = str(result.inserted_id)
     else:
         raise HTTPException(status_code=500, detail="Database not initialized")
     

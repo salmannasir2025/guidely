@@ -1,16 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from datetime import timedelta
+from datetime import datetime, timedelta
+import secrets
 
 from ..auth import (
     create_user,
     authenticate_user,
     create_access_token,
-    get_current_active_user
+    get_current_active_user,
+    get_user,
+    get_password_hash
 )
 from ..config import settings
+from ..database import user_collection
 from ..schemas import AskRequest, AskResponse
-from ..schemas.auth import Token, UserCreate, User
+from ..schemas.auth import Token, UserCreate, User, PasswordResetRequest, PasswordReset
 
 router = APIRouter(
     prefix="/auth",

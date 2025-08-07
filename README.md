@@ -110,7 +110,59 @@ The application should now be fully functional on your local machine.
 
 ## ☁️ Deployment
 
+### Automatic Deployment
+
 This application is configured for continuous deployment to **Fly.io**. Any push to the `main` branch will automatically trigger the deployment workflow defined in `.github/workflows/fly-deploy.yml`.
+
+### Manual Deployment to Fly.io
+
+If you need to deploy manually, follow these steps:
+
+1. **Install the Fly.io CLI**:
+   ```bash
+   # On macOS
+   brew install flyctl
+   
+   # On Windows (using PowerShell)
+   iwr https://fly.io/install.ps1 -useb | iex
+   
+   # On Linux
+   curl -L https://fly.io/install.sh | sh
+   ```
+
+2. **Login to Fly.io**:
+   ```bash
+   fly auth login
+   ```
+
+3. **Set up Secrets**:
+   You need to set up the environment variables as secrets in Fly.io:
+   ```bash
+   fly secrets set GEMINI_API_KEY="your_gemini_api_key"
+   fly secrets set SERPAPI_API_KEY="your_serpapi_api_key"
+   fly secrets set MONGO_CONNECTION_STRING="your_mongo_connection_string"
+   fly secrets set REDIS_URL="your_redis_url"
+   fly secrets set JWT_SECRET_KEY="your_jwt_secret_key"
+   fly secrets set FRONTEND_URL="https://salmannasir2025.github.io"
+   # Add other required secrets
+   ```
+
+4. **Deploy the Application**:
+   ```bash
+   fly deploy
+   ```
+
+5. **Check Deployment Status**:
+   ```bash
+   fly status
+   ```
+
+6. **View Logs**:
+   ```bash
+   fly logs
+   ```
+
+The application will be deployed to `https://guidely-api.fly.dev`.
 
 ### License and Usage
 Guidely: AI Tutor & Assistant is currently under development and is made publicly available for reference and educational purposes. The project is not open-source under traditional licenses.

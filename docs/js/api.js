@@ -10,7 +10,7 @@ import { BACKEND_URL } from './config.js';
  */
 export async function askAI(payload, signal, onChunk, onDone, onError) {
     try {
-        const response = await fetch(`${BACKEND_URL}/api/ask/`, {
+                const response = await fetch(`${BACKEND_URL}/ask/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),

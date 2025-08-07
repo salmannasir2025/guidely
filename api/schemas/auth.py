@@ -37,7 +37,7 @@ class User(UserBase):
     Schema for user information returned by the API.
     Does not include sensitive information like the password.
     """
-    id: int
+    id: Optional[str] = None  # MongoDB ObjectId as string
     is_active: bool = True
     role: UserRole = UserRole.REGISTERED
     file_uploads: List[str] = []  # List of file IDs uploaded by the user
@@ -56,5 +56,4 @@ class PasswordReset(BaseModel):
     """Schema for password reset."""
     token: str
     full_name: Optional[str] = None  # Ensure this line is indented correctly
-    new_password: str = Field(..., min_length=8) # Ensure this line is indented correctly
-
+    new_password: str = Field(..., min_length=8)  # Ensure this line is indented correctly

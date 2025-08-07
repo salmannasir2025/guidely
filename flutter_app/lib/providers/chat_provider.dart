@@ -98,42 +98,6 @@ class ChatProvider with ChangeNotifier {
     });
   }
 
-  void _handleApiStream(Stream<String> apiStream) {
-    _isLoading = true;
-    notifyListeners();
-
-    final aiMessageId = _uuid.v4();
-    final aiMessage = ChatMessage(
-      id: aiMessageId,
-      text: '',
-      author: MessageAuthor.ai,
-      timestamp: DateTime.now(),
-    );
-    _messages.insert(0, aiMessage);
-
-    _currentSubscription = apiStream.listen((chunk) {
-      final index = _messages.indexWhere((msg) => msg.id == aiMessageId);
-      if (index != -1) {
-        final currentMessage = _messages[index];
-        _messages[index] = ChatMessage(
-            id: aiMessageId,
-            text: currentMessage.text + chunk,
-            author: MessageAuthor.ai,
-            timestamp: currentMessage.timestamp);
-        notifyListeners();
-      }
-    }, onDone: () {
-      _isLoading = false;
-      _currentSubscription = null;
-      notifyListeners();
-    }, onError: (error) {
-      // This part can be enhanced to show a more specific error message
-      _isLoading = false;
-      _currentSubscription = null;
-      notifyListeners();
-    });
-  }
-
   Future<void> sendMessage(String text) async {
     if (text.isEmpty) return;
 
