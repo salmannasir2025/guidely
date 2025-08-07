@@ -43,3 +43,4 @@ ENV/
 # Build artifacts
 /pre project/flutter_app/build/
 
+.env
