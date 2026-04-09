@@ -1,8 +1,9 @@
 from fastapi.concurrency import run_in_threadpool
+from typing import Optional
 from sympy import sympify, SympifyError
 
 
-async def solve_math_problem(expression: str) -> str | None:
+async def solve_math_problem(expression: str) -> Optional[str]:
     """
     Solves a mathematical expression using Sympy.
     Returns the result as a string, or None if the expression is invalid.

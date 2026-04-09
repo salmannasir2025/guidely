@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 from fastapi import UploadFile
 from fastapi.concurrency import run_in_threadpool
 from google.cloud import speech
@@ -56,7 +57,7 @@ TTS_VOICE_MAP = {
 DEFAULT_TTS_VOICE = TTS_VOICE_MAP["en-US"]
 
 
-async def speech_to_text(file: UploadFile, language_code: str = "en-US") -> str | None:
+async def speech_to_text(file: UploadFile, language_code: str = "en-US") -> Optional[str]:
     """
     Transcribes audio from a file using Google Cloud Speech-to-Text.
     Returns the transcribed text, or None if an error occurs.
@@ -105,7 +106,7 @@ async def speech_to_text(file: UploadFile, language_code: str = "en-US") -> str 
         return None
 
 
-async def text_to_speech(text: str, language_code: str = "en-US") -> bytes | None:
+async def text_to_speech(text: str, language_code: str = "en-US") -> Optional[bytes]:
     """
     Synthesizes speech from text using Google Cloud Text-to-Speech.
     Returns the audio content as bytes, or None if an error occurs.
