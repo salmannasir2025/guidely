@@ -46,3 +46,4 @@ ENV/
 .env
 .continue/
 .gemini/
+copilotchat.json
