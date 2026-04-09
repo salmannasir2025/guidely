@@ -5,7 +5,8 @@ from typing import List
 import uuid
 from datetime import datetime, timezone
 
-from .. import database, ocr, config
+from .. import database, config
+from ..tools.registry import tool_registry
 from ..auth import get_current_active_user, User
 from ..schemas.files import FileResponse
 
@@ -59,19 +60,16 @@ async def upload_file(file: UploadFile = File(...), current_user: User = Depends
             raise HTTPException(status_code=500, detail="Failed to save file metadata")
         
         # Process the file with OCR if it's an image
-        if file.content_type.startswith("image/"):
-            try:
-                # Use the content bytes for OCR if possible, or reset position
-                # Since we already have content in memory, we can use it.
-                # However, extract_text_from_image expects an UploadFile.
-                # Let's seek(0) as it is in the original code.
+                # Use the ToolRegistry for OCR
                 await file.seek(0)
-                ocr_text = await ocr.extract_text_from_image(file)
-                await database.update_file_ocr_text(db_file_id, ocr_text)
-                file_data["ocr_text"] = ocr_text
-                file_data["is_processed"] = True
-            except ocr.OCRError as e:
-                logging.error(f"OCR processing error: {e}")
+                ocr_tool = tool_registry.get_tool("ocr")
+                if ocr_tool:
+                    ocr_text = await ocr_tool.execute(file=file)
+                    await database.update_file_ocr_text(db_file_id, ocr_text)
+                    file_data["ocr_text"] = ocr_text
+                    file_data["is_processed"] = True
+            except Exception as e:
+                logging.error(f"OCR tool processing error: {e}")
                 # We continue even if OCR fails, as the file is still uploaded
         
         return FileResponse(

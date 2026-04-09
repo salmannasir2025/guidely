@@ -2,7 +2,9 @@ import logging
 from fastapi import APIRouter, HTTPException, Request, Depends
 import json
 from fastapi.responses import StreamingResponse
-from .. import llm, search, math_solver, prompts, database
+from .. import llm, prompts, database
+from ..memory_manager import memory_manager
+from ..tools.registry import tool_registry
 from ..limiter import expensive_api_rate_limit, limiter
 from ..schemas.core import AskRequest, AskResponse
 from ..auth import get_current_active_user, User
@@ -50,40 +52,49 @@ async def stream_and_log(
 async def get_response_generator(body: AskRequest):
     """
     This generator encapsulates the agent's logic: classify, route to a tool,
-    and finally stream a response from the LLM. It yields metadata and answer chunks.
+    and finally stream a response from the LLM based on SOUL context.
     """
-    # 1. Classify the query to determine the intent
+    # 1. Fetch Agent Identity and User Context (Nanobot Style)
+    soul = memory_manager.get_soul()
+    user_context = memory_manager.get_user_context()
+    
+    # 2. Classify the query to determine the intent
     category = await llm.classify_query(body.query)
 
-    # 2. Route to a specialized tool if necessary
+    # 3. Route to a specialized tool if necessary (via Registry)
     if category == "math":
-        # For math, we try the solver first for accuracy.
-        math_result = await math_solver.solve_math_problem(body.query)
-        if math_result:
-            # The solver gave a definitive answer. We yield it directly and finish.
-            yield {
-                "type": "result",
-                "source": "math_solver",
-                "chunk": f"The answer is {math_result}.",
-            }
-            return
+        math_tool = tool_registry.get_tool("math_solver")
+        if math_tool:
+            math_result = await math_tool.execute(expression=body.query)
+            if math_result:
+                yield {
+                    "type": "result",
+                    "source": "math_solver",
+                    "chunk": f"The answer is {math_result}.",
+                }
+                return
 
-    # 3. For other categories or if the math solver fails, gather context using web search.
+    # 4. For other categories, gather context using the registry's search tool.
     search_context = ""
-    source = "llm"  # Default source if no search is performed or if search fails
+    source = "llm"
     if category in SEARCHABLE_CATEGORIES:
-        search_context = await search.perform_web_search(body.query)
-        if search_context:
-            source = "web_search"
+        search_tool = tool_registry.get_tool("web_search")
+        if search_tool:
+            search_context = await search_tool.execute(query=body.query)
+            if search_context:
+                source = "web_search"
 
-    # 4. Generate the final prompt for the LLM using the gathered context
-    prompt = prompts.get_rag_prompt(
+    # 5. Generate the final prompt, injecting SOUL and user context
+    rag_prompt = prompts.get_rag_prompt(
         category, search_context, body.query, body.language_code
     )
+    
+    # Prepend SOUL and user context for a fully agentic response
+    full_prompt = f"{soul}\n\n{user_context}\n\n{rag_prompt}"
 
-    # 5. Yield the source metadata, then stream the LLM's explanation as content chunks
+    # 6. Yield metadata and stream the LLM's explanation
     yield {"type": "metadata", "source": source}
-    async for chunk in llm.get_llm_explanation_stream(prompt):
+    async for chunk in llm.get_llm_explanation_stream(full_prompt):
         yield {"type": "content", "chunk": chunk}
 
 

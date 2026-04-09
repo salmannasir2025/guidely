@@ -9,8 +9,9 @@ import logging
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
-from . import cache, config, database, llm, logging_config, ocr, speech
-from .routers import ask, data, auth, utils, files  # Import the router modules
+from . import cache, config, database, llm, logging_config
+from .tools.registry import tool_registry
+from .routers import ask, data, auth, utils, files
 from .limiter import _rate_limit_exceeded_handler, limiter
 from .schemas import ComponentStatus, HealthCheckResponse
 
@@ -21,7 +22,6 @@ async def lifespan(app: FastAPI):
     logging_config.setup_logging()
     llm.initialize_llm()
     database.initialize_database()
-    ocr.initialize_ocr_client()
     cache.initialize_redis()  # Initialize Redis client
     yield
     # Code to run on application shutdown (e.g., close connections)
@@ -89,23 +89,17 @@ async def health_check(response: Response):
     checks = [
         ("database", database.check_db_connection, "Could not connect to MongoDB."),
         ("redis_cache", cache.check_redis_connection, "Could not connect to Redis."),
-        ("llm_service", llm.check_llm_client, "LLM client not initialized."),
-        (
-            "vision_service",
-            ocr.check_vision_client,
-            "Google Vision client not initialized.",
-        ),
-        (
-            "speech_to_text_service",
-            speech.check_speech_to_text_client,
-            "Google Speech-to-Text client not initialized.",
-        ),
-        (
-            "text_to_speech_service",
-            speech.check_text_to_speech_client,
-            "Google Text-to-Speech client not initialized.",
-        ),
+        ("llm_service", llm.check_llm_client, "LLM provider not initialized."),
     ]
+
+    # Dynamically add registered tools to health checks
+    for tool_name in tool_registry.list_tools():
+        tool = tool_registry.get_tool(tool_name)
+        checks.append((
+            f"tool_{tool_name}", 
+            lambda t=tool: t is not None, 
+            f"Tool {tool_name} not available."
+        ))
 
     component_statuses: dict = {}
     is_healthy = True

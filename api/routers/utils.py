@@ -3,7 +3,8 @@ import io
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
-from .. import llm, speech
+from .. import llm
+from ..tools.registry import tool_registry
 from ..auth import get_current_active_user
 from ..limiter import expensive_api_rate_limit, limiter
 from ..prompts import LANGUAGE_MAP
@@ -20,22 +21,20 @@ router = APIRouter(
 @limiter.limit(expensive_api_rate_limit)
 async def synthesize_speech(request: Request, body: SynthesizeRequest):
     try:
-        audio_content = await speech.text_to_speech(body.text, body.language_code)
+        tts_tool = tool_registry.get_tool("text_to_speech")
+        if not tts_tool:
+             raise HTTPException(status_code=503, detail="Speech synthesis tool not available.")
+             
+        audio_content = await tts_tool.execute(text=body.text, language_code=body.language_code)
         if not audio_content:
             raise HTTPException(
                 status_code=500,
-                detail="Failed to synthesize audio due to an unknown error.",
+                detail="Failed to synthesize audio.",
             )
         return StreamingResponse(io.BytesIO(audio_content), media_type="audio/mpeg")
-    except speech.UnsupportedLanguageError as e:
-        error_detail = {
-            "error_code": "UNSUPPORTED_TTS_LANGUAGE",
-            "message": str(e),
-            "suggestions": list(speech.TTS_VOICE_MAP.keys()),
-        }
-        raise HTTPException(status_code=400, detail=error_detail)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"Synthesis error: {e}")
+        raise HTTPException(status_code=500, detail="An error occurred during synthesis.")
 
 
 @router.post("/translate", response_model=TranslateResponse)
