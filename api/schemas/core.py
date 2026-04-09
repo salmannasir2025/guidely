@@ -9,6 +9,7 @@ class AskRequest(BaseModel):
     query: str
     mode: str  # "tutor" or "assistant"
     language_code: Optional[str] = "en-US"
+    provider: Optional[str] = "gemini"
 
 
 class AskResponse(BaseModel):

@@ -63,14 +63,15 @@ app.add_middleware(
 
 # --- API Routers ---
 # Update the import line
-from .routers import ask, data, auth, utils, files  # Add files to the import
+from .routers import ask, data, auth, utils, files, user_keys  # Add user_keys to the import
 
 # Update the router registration section
 app.include_router(auth.router)
 app.include_router(ask.router)
 app.include_router(data.router)
 app.include_router(utils.router)
-app.include_router(files.router)  # Add the files router
+app.include_router(files.router)
+app.include_router(user_keys.router)  # Add the user_keys router
 
 
 @app.get("/", tags=["Monitoring"])

@@ -108,3 +108,38 @@ async def reset_password(request: Request, reset_data: PasswordReset):
     )
     
     return {"message": "Password has been reset successfully"}
+
+from ..utils.google_auth import verify_google_token
+
+@router.post("/google", response_model=Token)
+@limiter.limit(expensive_api_rate_limit)
+async def google_auth(request: Request, google_token: dict):
+    """Verify Google token and login/register user."""
+    token = google_token.get("token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Missing Google token")
+    
+    id_info = verify_google_token(token)
+    if not id_info:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+    
+    email = id_info.get("email")
+    full_name = id_info.get("name")
+    
+    # Check if user exists, otherwise create
+    user = await user_collection.find_one({"email": email})
+    if not user:
+        # Create a new user (with random password since it's OAuth)
+        from ..auth import create_user
+        new_user = UserCreate(
+            email=email,
+            full_name=full_name,
+            password=secrets.token_urlsafe(16)
+        )
+        await create_user(new_user)
+    
+    access_token_expires = timedelta(minutes=settings.jwt_access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": email}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}

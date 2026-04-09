@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = 30
     password_reset_token_expire_hours: int = 1
 
+    # Security & Auth
+    secret_vault_key: str = "replace-this-with-a-32-byte-base64-key"
+    google_client_id: str = ""
+
     # Email settings for password recovery
     mail_username: str
     mail_password: str

@@ -6,8 +6,16 @@
     <title>AI Tutor & Assistant</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <link rel="stylesheet" href="style.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
+    <!-- Hidden Registration CTA Banner -->
+    <div id="auth-cta-banner" class="cta-banner" style="display: none;">
+        <span class="cta-text">🎉 You've found value in Guidely! Sign up now to save your chat history and unlock multi-model features.</span>
+        <button id="open-auth-btn" class="btn btn-primary btn-sm">Sign Up / Login</button>
+        <button id="close-cta-btn" class="btn btn-close">&times;</button>
+    </div>
+
     <div class="chat-container">
         <div class="chat-header">
             <h3>AI Tutor & Assistant</h3>
@@ -28,6 +36,9 @@
                     </button>
                     <button id="clear-history-btn" class="btn icon-btn" title="Clear Chat History">
                         <span class="button-text">🗑️</span><div class="spinner"></div>
+                    </button>
+                    <button id="settings-btn" class="btn icon-btn" title="AI Settings">
+                        <span class="button-text">⚙️</span>
                     </button>
                 </div>
             </div>
@@ -56,6 +67,134 @@
             </button>
         </form>
     </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span id="close-modal-btn" class="close">&times;</span>
+            <div id="auth-tabs">
+                <button class="tab-btn active" data-tab="login">Login</button>
+                <button class="tab-btn" data-tab="signup">Sign Up</button>
+            </div>
+
+            <div id="login-tab" class="tab-content active">
+                <h2>Welcome Back</h2>
+                <div id="google-login-btn"></div>
+                <div class="divider"><span>OR</span></div>
+                <form id="login-form">
+                    <input type="email" id="login-email" placeholder="Email" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <button type="submit" class="btn btn-primary w-100">Login with Email</button>
+                </form>
+            </div>
+
+            <div id="signup-tab" class="tab-content">
+                <h2>Create Account</h2>
+                <div id="google-signup-btn"></div>
+                <div class="divider"><span>OR</span></div>
+                <form id="signup-form">
+                    <input type="text" id="signup-name" placeholder="Full Name" required>
+                    <input type="email" id="signup-email" placeholder="Email" required>
+                    <input type="password" id="signup-password" placeholder="Password" required>
+                    <button type="submit" class="btn btn-primary w-100">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Settings Modal -->
+    <div id="settings-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span id="close-settings-btn" class="close">&times;</span>
+            <div class="settings-header">
+                <h2>AI Provider Settings</h2>
+                <p>Register your own API keys to unlock specific models. Keys are encrypted at rest with your identity.</p>
+            </div>
+            
+            <div class="provider-list">
+                <!-- OpenAI -->
+                <div class="provider-item" data-provider="openai">
+                    <div class="provider-info">
+                        <strong>OpenAI (GPT-4)</strong>
+                        <span class="provider-status" id="openai-status">Not Configured</span>
+                    </div>
+                    <div class="provider-actions">
+                        <button class="btn btn-secondary btn-sm edit-key-btn">Manage</button>
+                    </div>
+                </div>
+                
+                <!-- Gemini -->
+                <div class="provider-item" data-provider="gemini">
+                    <div class="provider-info">
+                        <strong>Google Gemini</strong>
+                        <span class="provider-status" id="gemini-status">Using System Key</span>
+                    </div>
+                    <div class="provider-actions">
+                        <button class="btn btn-secondary btn-sm edit-key-btn">Add My Key</button>
+                    </div>
+                </div>
+
+                <!-- Minimax -->
+                <div class="provider-item" data-provider="minimax">
+                    <div class="provider-info">
+                        <strong>Minimax (MiniMax-Text-01)</strong>
+                        <span class="provider-badge free-badge">Free Tier</span>
+                        <span class="provider-status" id="minimax-status">Not Configured</span>
+                    </div>
+                    <div class="provider-actions">
+                        <button class="btn btn-secondary btn-sm edit-key-btn">Manage</button>
+                    </div>
+                </div>
+
+                <!-- Grok -->
+                <div class="provider-item" data-provider="grok">
+                    <div class="provider-info">
+                        <strong>xAI Grok (grok-beta)</strong>
+                        <span class="provider-status" id="grok-status">Not Configured</span>
+                    </div>
+                    <div class="provider-actions">
+                        <button class="btn btn-secondary btn-sm edit-key-btn">Manage</button>
+                    </div>
+                </div>
+
+                <!-- Qwen -->
+                <div class="provider-item" data-provider="qwen">
+                    <div class="provider-info">
+                        <strong>Alibaba Qwen (qwen-turbo)</strong>
+                        <span class="provider-badge free-badge">Free Tier</span>
+                        <span class="provider-status" id="qwen-status">Not Configured</span>
+                    </div>
+                    <div class="provider-actions">
+                        <button class="btn btn-secondary btn-sm edit-key-btn">Manage</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="key-input-form" style="display: none; margin-top: 20px;">
+                <h4 id="key-input-title">Manage OpenAI Key</h4>
+                <div class="form-group">
+                    <input type="password" id="api-key-input" placeholder="Enter your Sk-..." class="w-100">
+                    <div class="form-actions mt-2">
+                        <button id="save-key-btn" class="btn btn-primary">Save Encrypted Key</button>
+                        <button id="delete-key-btn" class="btn btn-danger" style="display: none;">Delete Key</button>
+                        <button id="cancel-key-btn" class="btn btn-link">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-footer mt-4">
+                <h4>Active Model</h4>
+                <select id="active-provider-select" class="w-100">
+                    <option value="gemini">🟦 Default (Google Gemini)</option>
+                    <option value="openai">🟩 OpenAI (Personal Key Required)</option>
+                    <option value="minimax">🟨 Minimax — Free Tier</option>
+                    <option value="grok">🟥 xAI Grok</option>
+                    <option value="qwen">🟧 Alibaba Qwen — Free Tier</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>

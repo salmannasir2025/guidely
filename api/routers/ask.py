@@ -8,6 +8,7 @@ from ..tools.registry import tool_registry
 from ..limiter import expensive_api_rate_limit, limiter
 from ..schemas.core import AskRequest, AskResponse
 from ..auth import get_current_active_user, User
+from ..utils.vault import vault
 
 router = APIRouter(
     prefix="/ask",
@@ -49,17 +50,31 @@ async def stream_and_log(
             await database.log_interaction(current_user.email, request_body, response_body)
 
 
-async def get_response_generator(body: AskRequest):
+async def get_response_generator(body: AskRequest, current_user: User):
     """
     This generator encapsulates the agent's logic: classify, route to a tool,
     and finally stream a response from the LLM based on SOUL context.
     """
+    # 0. Handle Provider and Keys
+    provider = body.provider or "gemini"
+    api_key = None
+    
+    # If registered user, look for encrypted keys in profile
+    if hasattr(current_user, 'api_keys') and current_user.api_keys:
+        encrypted_key = current_user.api_keys.get(provider)
+        if encrypted_key:
+            try:
+                # Decrypt key using Vault with user-binding
+                api_key = vault.decrypt_api_key(encrypted_key, str(current_user.id))
+            except Exception as e:
+                logging.error(f"Failed to decrypt key for {provider}: {e}")
+
     # 1. Fetch Agent Identity and User Context (Layered Memory Style)
     soul = memory_manager.get_soul()
     user_context = memory_manager.get_user_context()
     
-    # 2. Classify the query to determine the intent
-    category = await llm.classify_query(body.query)
+    # 2. Classify the query to determine the intent (using specific provider/key)
+    category = await llm.classify_query(body.query, provider=provider, api_key=api_key)
 
     # 3. Route to a specialized tool if necessary (via Registry)
     if category == "math":
@@ -94,7 +109,7 @@ async def get_response_generator(body: AskRequest):
 
     # 6. Yield metadata and stream the LLM's explanation
     yield {"type": "metadata", "source": source}
-    async for chunk in llm.get_llm_explanation_stream(full_prompt):
+    async for chunk in llm.get_llm_explanation_stream(full_prompt, provider=provider, api_key=api_key):
         yield {"type": "content", "chunk": chunk}
 
 
@@ -108,7 +123,7 @@ async def handle_ask(request: Request, body: AskRequest, current_user: User = De
     The full interaction is logged to the database after the response is sent.
     """
     try:
-        response_generator = get_response_generator(body)
+        response_generator = get_response_generator(body, current_user)
         return StreamingResponse(
             stream_and_log(body, response_generator, current_user),
             media_type="application/x-ndjson",
@@ -144,10 +159,10 @@ async def handle_guest_ask(request: Request, body: AskRequest):
             )
         
         # For simple queries, process normally but with stricter rate limits
-        response_generator = get_response_generator(body)
-        
         # Create a guest user for logging
         guest_user = User(email="guest@example.com", role="guest")
+        
+        response_generator = get_response_generator(body, guest_user)
         
         return StreamingResponse(
             stream_and_log(body, response_generator, guest_user),

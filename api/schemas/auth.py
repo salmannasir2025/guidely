@@ -41,6 +41,7 @@ class User(UserBase):
     is_active: bool = True
     role: UserRole = UserRole.REGISTERED
     file_uploads: List[str] = []  # List of file IDs uploaded by the user
+    api_keys: Optional[Dict[str, str]] = {}  # Store encrypted keys: {provider: ciphertext}
 
     class Config:
         """Pydantic configuration."""

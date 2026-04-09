@@ -10,14 +10,18 @@ import { BACKEND_URL } from './config.js';
  */
 export async function askAI(payload, signal, onChunk, onDone, onError) {
     try {
-        console.log('Making request to:', `${BACKEND_URL}/ask/guest`);
+        const isGuest = !localStorage.getItem('guidely_jwt_token');
+        const endpoint = isGuest ? `${BACKEND_URL}/ask/guest` : `${BACKEND_URL}/ask`;
+        
+        console.log('Making request to:', endpoint);
         console.log('Payload:', payload);
         
-        const response = await fetch(`${BACKEND_URL}/ask/guest`, {
+        const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Accept': 'application/x-ndjson'
+                'Accept': 'application/x-ndjson',
+                ...getAuthHeader()
             },
             body: JSON.stringify(payload),
             signal, // Pass the abort signal to fetch
@@ -94,6 +98,93 @@ export async function uploadFile(file, uploadType) {
         console.error(`Error uploading ${uploadType}:`, error);
         throw error;
     }
+}
+
+/**
+ * Key Management Methods
+ */
+export async function saveProviderKey(provider, key) {
+    const response = await fetch(`${BACKEND_URL}/users/me/keys/`, {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+        },
+        body: JSON.stringify({ provider, key })
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to save API key');
+    }
+    return await response.json();
+}
+
+export async function listProviderKeys() {
+    const response = await fetch(`${BACKEND_URL}/users/me/keys/`, {
+        method: 'GET',
+        headers: getAuthHeader()
+    });
+    if (!response.ok) throw new Error('Failed to list API keys');
+    const data = await response.json();
+    return data.providers || [];
+}
+
+export async function deleteProviderKey(provider) {
+    const response = await fetch(`${BACKEND_URL}/users/me/keys/${provider}`, {
+        method: 'DELETE',
+        headers: getAuthHeader()
+    });
+    if (!response.ok) throw new Error('Failed to delete API key');
+    return await response.json();
+}
+
+/**
+ * Utils
+ */
+function getAuthHeader() {
+    const token = localStorage.getItem('guidely_jwt_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+/**
+ * Auth Methods
+ */
+export async function register(userData) {
+    const response = await fetch(`${BACKEND_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+    });
+    if (!response.ok) throw new Error('Registration failed');
+    return await response.json();
+}
+
+export async function login(email, password) {
+    const formData = new URLSearchParams();
+    formData.append('username', email); // OAuth2PasswordRequestForm expects 'username'
+    formData.append('password', password);
+
+    const response = await fetch(`${BACKEND_URL}/auth/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData
+    });
+    if (!response.ok) throw new Error('Login failed');
+    const data = await response.json();
+    localStorage.setItem('guidely_jwt_token', data.access_token);
+    return data;
+}
+
+export async function verifyGoogleToken(idToken) {
+    const response = await fetch(`${BACKEND_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: idToken })
+    });
+    if (!response.ok) throw new Error('Google authentication failed');
+    const data = await response.json();
+    localStorage.setItem('guidely_jwt_token', data.access_token);
+    return data;
 }
 
 /**
