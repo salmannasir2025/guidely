@@ -19,7 +19,7 @@ class GeminiProvider(BaseLLMProvider):
         # to Gemini's 'role' and 'parts'.
         try:
             # Flattening messages into a single prompt for speed and simplicity 
-            # following the Nanobot pattern, or using Gemini's chat history.
+            # following the layered context pattern, or using Gemini's chat history.
             prompt = self._format_messages(messages)
             response = self._model.generate_content(prompt)
             return response.text

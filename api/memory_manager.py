@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 
 class MemoryManager:
-    """Manages Nanobot-inspired layered memory files."""
+    """Manages file-based layered memory logic (Soul, User, History)."""
 
     def __init__(self, memory_dir: Path = None):
         if memory_dir is None:

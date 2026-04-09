@@ -3,7 +3,7 @@ from typing import Dict, Optional, List
 from .base import BaseTool
 
 class ToolRegistry:
-    """Nanobot-inspired registry for application tools."""
+    """A centralized registry for application tools."""
 
     def __init__(self):
         self._tools: Dict[str, BaseTool] = {}

@@ -60,6 +60,8 @@ async def upload_file(file: UploadFile = File(...), current_user: User = Depends
             raise HTTPException(status_code=500, detail="Failed to save file metadata")
         
         # Process the file with OCR if it's an image
+        if file.content_type.startswith("image/"):
+            try:
                 # Use the ToolRegistry for OCR
                 await file.seek(0)
                 ocr_tool = tool_registry.get_tool("ocr")

@@ -54,7 +54,7 @@ async def get_response_generator(body: AskRequest):
     This generator encapsulates the agent's logic: classify, route to a tool,
     and finally stream a response from the LLM based on SOUL context.
     """
-    # 1. Fetch Agent Identity and User Context (Nanobot Style)
+    # 1. Fetch Agent Identity and User Context (Layered Memory Style)
     soul = memory_manager.get_soul()
     user_context = memory_manager.get_user_context()
     

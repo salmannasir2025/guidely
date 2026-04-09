@@ -1,4 +1,4 @@
-from . import llm, search
+# Prompts for the AI Tutor
 
 LANGUAGE_MAP = {
     "en-US": "English",
