@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 
 from ..auth import (
@@ -15,6 +15,8 @@ from ..config import settings
 from ..database import user_collection
 from ..schemas import AskRequest, AskResponse
 from ..schemas.auth import Token, UserCreate, User, PasswordResetRequest, PasswordReset
+from ..limiter import limiter, expensive_api_rate_limit
+from fastapi import Request
 
 router = APIRouter(
     prefix="/auth",
@@ -23,12 +25,14 @@ router = APIRouter(
 )
 
 @router.post("/register", response_model=User)
-async def register(user: UserCreate):
+@limiter.limit(expensive_api_rate_limit)
+async def register(request: Request, user: UserCreate):
     """Register a new user."""
     return await create_user(user)
 
 @router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+@limiter.limit(expensive_api_rate_limit)
+async def login_for_access_token(request: Request, form_data: OAuth2PasswordRequestForm = Depends()):
     """Get access token using username (email) and password."""
     user = await authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -55,7 +59,8 @@ from datetime import datetime, timedelta
 
 # Add these endpoints
 @router.post("/forgot-password")
-async def forgot_password(request: PasswordResetRequest):
+@limiter.limit(expensive_api_rate_limit)
+async def forgot_password(request: Request, password_request: PasswordResetRequest):
     """Send a password reset link to the user's email."""
     user = await get_user(request.email)
     if not user:
@@ -66,7 +71,7 @@ async def forgot_password(request: PasswordResetRequest):
     reset_token = secrets.token_urlsafe(32)
     
     # Store the token in the database with an expiration time
-    expiration = datetime.utcnow() + timedelta(hours=1)
+    expiration = datetime.now(timezone.utc) + timedelta(hours=1)
     await user_collection.update_one(
         {"email": request.email},
         {"$set": {"reset_token": reset_token, "reset_token_expires": expiration}}
@@ -80,12 +85,13 @@ async def forgot_password(request: PasswordResetRequest):
     }
 
 @router.post("/reset-password")
-async def reset_password(reset_data: PasswordReset):
+@limiter.limit(expensive_api_rate_limit)
+async def reset_password(request: Request, reset_data: PasswordReset):
     """Reset a user's password using a reset token."""
     # Find the user with the given token
     user = await user_collection.find_one({
         "reset_token": reset_data.token,
-        "reset_token_expires": {"$gt": datetime.utcnow()}
+        "reset_token_expires": {"$gt": datetime.now(timezone.utc)}
     })
     
     if not user:

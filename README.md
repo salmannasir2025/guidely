@@ -2,7 +2,7 @@
 
 Guidely is a sophisticated, multilingual AI-powered tutor and assistant designed to provide educational support tailored to the regions of Pakistan. It leverages a modern tech stack to deliver a responsive, secure, and feature-rich experience.
 
-The backend for this application is now deployed on **[Fly.io](https://fly.io/)** and is configured for continuous deployment using GitHub Actions.
+The backend for this application is designed for simple local execution, ensuring it can run on legacy hardware without the need for complex containerization like Docker.
 
 ## ✨ Features
 
@@ -17,17 +17,17 @@ The backend for this application is now deployed on **[Fly.io](https://fly.io/)*
     - **Speech-to-Text**: Transcribes user audio into text.
     - **Translation**: Translates text between English and regional languages like Urdu, Pashto, and Sindhi.
 - **Image-to-Text (OCR)**: Extracts text from images using Google Cloud Vision.
-- **Persistent Chat History**: Saves user interactions to a MongoDB database for session continuity.
-- **Robust & Scalable Architecture**:
+- **Persistent Chat History**: Saves user interactions to a database for session continuity.
+- **Robust & Simple Architecture**:
     - Built with **FastAPI** for high-performance, asynchronous request handling.
     - **Rate Limiting** to prevent abuse and ensure service stability.
-    - **Redis Caching** for expensive operations like LLM calls and web searches to improve performance and reduce costs.
+    - **Smart Caching**: Uses Redis if available, or falls back to an efficient in-memory cache for speed on slower systems.
 
 ## 🛠️ Tech Stack
 
 - **Backend:** FastAPI, Uvicorn
-- **Database:** MongoDB Atlas
-- **Cache:** Redis
+- **Database:** MongoDB (Local or Atlas)
+- **Cache**: In-memory (Default) or Redis (Optional)
 - **Core AI Services:**
   - **LLM:** Google Gemini
   - **Speech-to-Text:** Google Cloud Speech-to-Text
@@ -35,134 +35,73 @@ The backend for this application is now deployed on **[Fly.io](https://fly.io/)*
   - **OCR:** Google Cloud Vision
   - **Web Search:** SerpAPI
 - **Frontend:** Vanilla HTML, CSS, and JavaScript (ESM)
-- **Deployment:** Fly.io, Docker, GitHub Actions
 
-
-
-## Local Development Setup
-
-Follow these instructions to set up and run the project on your local machine for development and testing.
+## 🚀 Local Development Setup
 
 ### Prerequisites
 
 - Git
 - Python 3.11+
-- Docker Desktop (recommended)
-- Access to a MongoDB Atlas cluster, Redis instance, and the required Google Cloud APIs.
+- Access to a MongoDB instance and the required Google Cloud APIs.
 
 ### 1. Clone the Repository
 
+```bash
 git clone https://github.com/salmannasir2025/guidely.git
 cd guidely
+```
 
 ### 2. Backend Setup
-The backend is a FastAPI application located in the api/ directory.
-Step A: Create and Activate Virtual Environment
 
-### Navigate into the API directory
-cd api
+The backend is a FastAPI application.
 
-### Create a virtual environment
+**Step A: Create and Activate Virtual Environment**
+
+```bash
 python -m venv .venv
-
-### Activate the environment
-### On Windows (PowerShell):
-.\\.venv\\Scripts\\Activate.ps1
-
-### On macOS/Linux:
+# On macOS/Linux:
 source .venv/bin/activate
-Step B: Install Dependencies
+# On Windows:
+.venv\Scripts\activate
+```
 
-### Ensure your virtual environment is active
+**Step B: Install Dependencies**
+
+```bash
 pip install -r requirements.txt
+```
 
-### Step C: Configure Environment Variables
-The application requires API keys and connection strings to run. These are managed via a .env file for local development.
-Create a file named .env inside the api/ directory.
-Copy the contents of api/.env.example into your new api/.env file.
-Fill in the actual values for each variable.
+**Step C: Configure Environment Variables**
 
-### Required Variables:
+Create a file named `.env` inside the `api/` directory (or use environment variables) with the following:
 
-Variable	Description
-GEMINI_API_KEY	Your API key for the Google Gemini LLM.
-SERPAPI_API_KEY	Your API key for the SerpAPI web search.
-MONGO_URI	The full connection string for your MongoDB.
-REDIS_URL	The connection URL for your Redis instance.
-FRONTEND_URL	The local URL of the frontend (e.g., http://127.0.0.1:5500) for CORS.
-Note: The .env file is listed in .gitignore and will never be committed to the repository.
+```env
+GEMINI_API_KEY="your_key"
+SERPAPI_API_KEY="your_key"
+MONGO_CONNECTION_STRING="mongodb://localhost:27017"
+MONGO_DB_NAME="guidely"
+JWT_SECRET_KEY="your_secret"
+FRONTEND_URL="http://localhost:5500"
+```
 
-### Step D: Run the Backend Server
-### From the 'api/' directory with the virtual environment active:
-uvicorn index:app --reload
-The API will be available at http://127.0.0.1:8000. You can view the interactive documentation at http://127.0.0.1:8000/docs.
+**Step D: Run the Backend Server**
+
+```bash
+python main.py
+```
+
+The API will be available at `http://127.0.0.1:8000`. You can view the interactive documentation at `http://127.0.0.1:8000/docs`.
 
 ### 3. Frontend Setup
-With the backend running, you can now launch the vanilla JS frontend.
-Open with a Live Server:
-The easiest way to run the frontend is with a live server extension (like "Live Server" in VS Code).
-Right-click the frontend/index.html file and choose "Open with Live Server". This handles CORS issues automatically.
 
-### Open Directly:
-Alternatively, navigate to the frontend directory in your file explorer.
-Open the index.html file directly in a modern web browser.
-The application should now be fully functional on your local machine.
+The frontend is located in the `docs/` directory (static site). You can run it by opening `docs/index.html` in a browser or by using a simple static file server.
 
-## ☁️ Deployment
+```bash
+# Example using Python to serve the frontend
+cd docs
+python -m http.server 5500
+```
 
-### Automatic Deployment
-
-This application is configured for continuous deployment to **Fly.io**. Any push to the `main` branch will automatically trigger the deployment workflow defined in `.github/workflows/fly-deploy.yml`.
-
-### Manual Deployment to Fly.io
-
-If you need to deploy manually, follow these steps:
-
-1. **Install the Fly.io CLI**:
-   ```bash
-   # On macOS
-   brew install flyctl
-   
-   # On Windows (using PowerShell)
-   iwr https://fly.io/install.ps1 -useb | iex
-   
-   # On Linux
-   curl -L https://fly.io/install.sh | sh
-   ```
-
-2. **Login to Fly.io**:
-   ```bash
-   fly auth login
-   ```
-
-3. **Set up Secrets**:
-   You need to set up the environment variables as secrets in Fly.io:
-   ```bash
-   fly secrets set GEMINI_API_KEY="your_gemini_api_key"
-   fly secrets set SERPAPI_API_KEY="your_serpapi_api_key"
-   fly secrets set MONGO_CONNECTION_STRING="your_mongo_connection_string"
-   fly secrets set REDIS_URL="your_redis_url"
-   fly secrets set JWT_SECRET_KEY="your_jwt_secret_key"
-   fly secrets set FRONTEND_URL="https://salmannasir2025.github.io"
-   # Add other required secrets
-   ```
-
-4. **Deploy the Application**:
-   ```bash
-   fly deploy
-   ```
-
-5. **Check Deployment Status**:
-   ```bash
-   fly status
-   ```
-
-6. **View Logs**:
-   ```bash
-   fly logs
-   ```
-
-The application will be deployed to `https://guidely-api.fly.dev`.
 
 ### License and Usage
 Guidely: AI Tutor & Assistant is currently under development and is made publicly available for reference and educational purposes. The project is not open-source under traditional licenses.

@@ -45,13 +45,7 @@ app.add_middleware(SlowAPIMiddleware)
 # In a production environment, you would restrict the origins to your frontend's domain.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        config.settings.frontend_url,
-        "https://salmannasir2025.github.io",
-        "http://localhost:3000",
-        "http://127.0.0.1:5500",
-        "http://localhost:5500"
-    ],
+    allow_origins=config.settings.allowed_origins + [config.settings.frontend_url],
     allow_credentials=True,
     allow_methods=[
         "GET",

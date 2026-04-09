@@ -1,6 +1,0 @@
-# This file contains dependencies used for development, linting, and testing.
-# Install them with: pip install -r requirements-dev.txt
-
-ruff
-pytest
-httpx

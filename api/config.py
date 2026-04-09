@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     mongo_connection_string: str
     redis_url: str
     frontend_url: str
+    allowed_origins: List[str] = [
+        "https://salmannasir2025.github.io",
+        "http://localhost:3000",
+        "http://127.0.0.1:5500",
+        "http://localhost:5500"
+    ]
     mongo_db_name: str = "ai_tutor_db"
     mongo_interactions_collection: str = "interactions"
     mongo_feedback_collection: str = "feedback"

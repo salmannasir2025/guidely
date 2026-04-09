@@ -36,8 +36,12 @@ def get_rag_prompt(
 
     template = PROMPT_TEMPLATES[template_key]
 
+    # Sanitize inputs by escaping braces to prevent .format() from crashing
+    safe_query = query.replace("{", "{{").replace("}", "}}")
+    safe_context = search_context.replace("{", "{{").replace("}", "}}")
+
     return template.format(
-        search_context=search_context,
-        query=query,
+        search_context=safe_context,
+        query=safe_query,
         language_instruction=language_instruction,
     )

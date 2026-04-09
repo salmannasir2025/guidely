@@ -19,3 +19,14 @@ passlib[argon2]
 email-validator
 python-multipart
 fastapi-mail
+
+# Development dependencies
+pytest
+pytest-asyncio
+httpx
+black
+isort
+flake8
+mypy
+coverage
+ruff

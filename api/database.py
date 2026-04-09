@@ -162,13 +162,16 @@ async def log_feedback(request: FeedbackRequest) -> None:
 
 
 # Add these functions for file management
-async def save_file_metadata(file_data: dict) -> str:
-    """Saves file metadata to the database and returns the file ID."""
+async def save_file_metadata(file_data: dict, content: bytes = None) -> str:
+    """Saves file metadata and optional content to the database."""
     if not file_collection:
         logging.warning("Database not available. Cannot save file metadata.")
         return None
         
     try:
+        if content:
+            file_data["content"] = content
+            
         result = await file_collection.insert_one(file_data)
         return str(result.inserted_id)
     except Exception as e:

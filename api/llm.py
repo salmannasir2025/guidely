@@ -72,7 +72,11 @@ async def classify_query(query: str) -> str:
 
 Respond with a single word from the list of categories. Do not add any explanation or punctuation.
 
-User Query: "{query}"
+User Query:
+---
+{query}
+---
+
 Classification:"""
 
     def _classify():
@@ -101,7 +105,9 @@ async def translate_text(text: str, target_language: str, source_language: str) 
     """
     Uses the LLM to translate text from a source language to a target language.
     """
-    prompt = f"Translate the following text from {source_language} to {target_language}. Provide only the translated text, with no additional commentary or labels.\n\nText to translate:\n---\n{text}\n---"
+    # Sanitize inputs by escaping braces to prevent formatting errors
+    safe_text = text.replace("{", "{{").replace("}", "}}")
+    prompt = f"Translate the following text from {source_language} to {target_language}. Provide only the translated text, with no additional commentary or labels.\n\nText to translate:\n---\n{safe_text}\n---"
 
     def _translate():
         try:

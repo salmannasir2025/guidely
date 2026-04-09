@@ -5,7 +5,7 @@ from typing import List
 import uuid
 from datetime import datetime, timezone
 
-from .. import database, ocr
+from .. import database, ocr, config
 from ..auth import get_current_active_user, User
 from ..schemas.files import FileResponse
 
@@ -35,17 +35,36 @@ async def upload_file(file: UploadFile = File(...), current_user: User = Depends
         
         # Read the file content
         content = await file.read()
-        file_data["size"] = len(content)
+        file_size = len(content)
         
-        # Save file metadata to database
-        db_file_id = await database.save_file_metadata(file_data)
+        # Validation: File size
+        if file_size > config.settings.file_upload_max_size:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"File too large. Max size is {config.settings.file_upload_max_size / 1024 / 1024}MB"
+            )
+            
+        # Validation: Content Type
+        if file.content_type not in config.settings.allowed_file_types:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"File type {file.content_type} not allowed. Supported types: {', '.join(config.settings.allowed_file_types)}"
+            )
+            
+        file_data["size"] = file_size
+        
+        # Save file metadata and content to database
+        db_file_id = await database.save_file_metadata(file_data, content=content)
         if not db_file_id:
             raise HTTPException(status_code=500, detail="Failed to save file metadata")
         
         # Process the file with OCR if it's an image
         if file.content_type.startswith("image/"):
             try:
-                # Reset file position to beginning
+                # Use the content bytes for OCR if possible, or reset position
+                # Since we already have content in memory, we can use it.
+                # However, extract_text_from_image expects an UploadFile.
+                # Let's seek(0) as it is in the original code.
                 await file.seek(0)
                 ocr_text = await ocr.extract_text_from_image(file)
                 await database.update_file_ocr_text(db_file_id, ocr_text)
