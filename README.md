@@ -4,6 +4,24 @@
 
 The backend is designed for simple local execution, ensuring it runs on legacy hardware without complex containerisation.
 
+## 📊 Architectural Workflow & System Topology
+
+```mermaid
+graph TD
+    A[Frontend Interface] -->|JWT Auth / Query| B(FastAPI Backend)
+    B -->|Cache Check| C{Redis Cache}
+    C -->|Hit| A
+    C -->|Miss| D[Query Router]
+    D -->|Math/Logic| E(SymPy Engine)
+    D -->|Search| F(SerpAPI)
+    D -->|General| G(Multi-Provider LLM Engine)
+    G -->|Streaming Response| B
+    
+    style A fill:#4D96FF,stroke:#333,stroke-width:2px,color:#fff
+    style B fill:#FF8E53,stroke:#333,stroke-width:2px,color:#fff
+    style G fill:#00FF66,stroke:#333,stroke-width:2px,color:#000
+```
+
 ## ✨ Features
 
 ### 🤖 Multi-Provider AI Engine
@@ -149,15 +167,10 @@ Open `http://localhost:5500` in your browser.
 
 ---
 
-### License and Usage
-
-Guidely is currently under active development and is made publicly available for reference and educational purposes. This project is **not** open-source under traditional licenses.
-
-You must obtain written consent from the copyright holder before engaging in any distribution or reproduction of the project's code or any of its parts. Unauthorized commercial use, distribution, and reproduction are strictly prohibited.
-
-For enquiries regarding the use of this project, please contact the project maintainer directly.
-
-*A formal license will be provided at a later date. Until then, please respect the terms stated above.*
+## ⚖️ Open-Source Academic Licensing & Disclaimer
+This project is open-sourced under the terms of the standard **MIT License**. It is an architectural Proof of Concept (PoC) engineered strictly for local environment evaluation, educational research, and technical sandbox testing.
+* **Operational Immunity:** This software is provided "as is", without warranty of any kind. ABT PLUS LLC (Automated Business Technologies) assumes zero liability, tracking obligation, or financial tracing responsibility for how third-party actors configure, clone, or deploy this script framework.
+* **Compliance Boundary:** Users bear sole individual responsibility for ensuring that all data extraction loops, automation streams, or third-party API keys (e.g., Twilio, Deepgram, Gemini) linked to this code comply with regional laws (GDPR, CCPA), telecom carrier standards, and target infrastructure Terms of Service (ToS).
 
 ---
 

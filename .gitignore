@@ -50,3 +50,18 @@ copilotchat.json
 Nanobot_Integration_Guide.md
 Nanobot_Integration_Guide.docx
 PROGRESS.md
+
+# --- Compliance Security Sweep Patterns ---
+.env
+*.env
+.env.*
+config.json
+venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.pyc
+*.pyo
+secrets.*
+.wdm/
