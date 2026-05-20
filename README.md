@@ -1,6 +1,6 @@
-# Guidely: AI Tutor & Assistant
+# Guidely: Enterprise-Grade RAG-Enhanced AI Educational Ecosystem
 
-Guidely is a sophisticated, multilingual AI-powered tutor and assistant designed to provide educational support tailored to the regions of Pakistan. It connects users with multiple AI engines through a single, unified interface — letting each user bring their own preferred AI or use the built-in default, all with enterprise-grade security.
+**Guidely** is a scalable, production-ready AI orchestration platform designed for localized educational delivery. It features a robust Retrieval-Augmented Generation (RAG) architecture, multi-modal input processing (Vision/Voice), and enterprise security (JWT/Argon2). Optimized for high-concurrency environments with Redis caching and asynchronous FastAPI backend.
 
 The backend is designed for simple local execution, ensuring it runs on legacy hardware without complex containerisation.
 
@@ -158,3 +158,13 @@ You must obtain written consent from the copyright holder before engaging in any
 For enquiries regarding the use of this project, please contact the project maintainer directly.
 
 *A formal license will be provided at a later date. Until then, please respect the terms stated above.*
+
+---
+
+## 📬 Contact & Corporate Information
+| | |
+| --- | --- |
+| **Organization** | ABT PLUS LLC (Automated Business Technologies) |
+| **Website** | [www.abtplusllc.com](https://www.abtplusllc.com) |
+| **Support** | [support@abtplusllc.com](mailto:support@abtplusllc.com) |
+| **License** | MIT — Open Source |
